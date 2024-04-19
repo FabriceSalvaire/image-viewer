@@ -36,9 +36,6 @@ __TRASH__/
 bin/
 doc/
 gh-pages/
-invoke.yaml
 open-doc.sh
 qml
 rcc
-setup-source-unix
-tasks/
