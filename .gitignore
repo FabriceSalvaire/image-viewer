@@ -40,12 +40,5 @@ invoke.yaml
 open-doc.sh
 qml
 rcc
-requirements-dev.txt
-requirements.txt
-setenv.sh
 setup-source-unix
-setup.cfg
-setup.py
-setup_data.py
 tasks/
-tox.ini
