@@ -23,10 +23,10 @@ README.html
 README.rst
 README.txt
 
-ImageBrowser/Common/LoremIpsum.py
-ImageBrowser/ImageProcessing/
-ImageBrowser/QtApplication/rcc/icons/
-ImageBrowser/QtApplication/rcc/translations/
+ImageBrowser/common/LoremIpsum.py
+ImageBrowser/backend/ImageProcessing/
+ImageBrowser/frontend/rcc/icons/
+ImageBrowser/frontend/rcc/translations/
 
 QtShim/
 

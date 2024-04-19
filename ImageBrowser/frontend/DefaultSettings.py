@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 ####################################################################################################
 #
 # ImageBrowser - ...
@@ -20,20 +18,38 @@
 #
 ####################################################################################################
 
-####################################################################################################
-
-import logging
-from BookBrowser.Common.Logging import Logging
-Logging.setup_logging()
-
-from BookBrowser.Application.ToolApplication import ToolApplication
+__all__ = [
+    'Shortcuts',
+    'ExternalProgram',
+]
 
 ####################################################################################################
 
-_module_logger = logging.getLogger(__name__)
-_module_logger.info('Started Book Browser')
+from pathlib import Path
+
+from PyQt5.QtCore import QCoreApplication
+
+from ImageBrowser.config import ConfigInstall
 
 ####################################################################################################
 
-application = ToolApplication()
-application.run()
+class Shortcuts:
+    previous_image = QCoreApplication.translate('shortcut', 'Previous image'), 'Backspace'
+    next_image = QCoreApplication.translate('shortcut', 'Next image'), 'n'   # Space
+    flip_image = QCoreApplication.translate('shortcut', 'Flip image'), 'r'
+    fit_to_screen = QCoreApplication.translate('shortcut', 'Fit to screen'), 'f'
+    full_zoom = QCoreApplication.translate('shortcut', 'Full Zoom'), 'z'
+    # open_image_in_external_program = QCoreApplication.translate('shortcut', 'Open in External Program'), ''
+    # apply_filter_on_image = QCoreApplication.translate('shortcut', 'Apply Filter on Image'), ''
+
+####################################################################################################
+
+class ExternalProgram:
+
+    if ConfigInstall.OS.on_linux:
+        gimp = Path('/usr', 'bin', 'gimp')
+
+    else:
+        gimp = None
+
+    default = gimp

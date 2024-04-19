@@ -47,7 +47,7 @@ import mimetypes
 
 from PIL import Image, PngImagePlugin
 
-from ImageBrowser.Common.Singleton import SingletonMetaClass
+from ImageBrowser.common.Singleton import SingletonMetaClass
 
 ####################################################################################################
 

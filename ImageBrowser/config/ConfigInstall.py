@@ -18,15 +18,18 @@
 #
 ####################################################################################################
 
+__all__ = ['Path', 'Logging']
+
 ####################################################################################################
 
-import os
+from pathlib import Path as plPath
 import sys
 
-from pathlib import Path
+####################################################################################################
 
-# Fixme: why ?
-import ImageBrowser.Common.Path as PathTools # due to Path class
+# due to Path class
+# require PathTools.find
+from ImageBrowser.common import PathTools
 
 ####################################################################################################
 
@@ -34,8 +37,7 @@ class OsFactory:
 
     ##############################################
 
-    def __init__(self):
-
+    def __init__(self) -> None:
         if sys.platform.startswith('linux'):
             self._name = 'linux'
         elif sys.platform.startswith('win'):
@@ -46,30 +48,29 @@ class OsFactory:
     ##############################################
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def on_linux(self):
+    def on_linux(self) -> bool:
         return self._name == 'linux'
 
     @property
-    def on_windows(self):
+    def on_windows(self) -> bool:
         return self._name == 'windows'
 
     @property
-    def on_osx(self):
+    def on_osx(self) -> bool:
         return self._name == 'osx'
 
 OS = OsFactory()
 
 ####################################################################################################
 
-_this_file = Path(__file__).resolve()
+_this_file = plPath(__file__).resolve()
 
 class Path:
-
-    image_browser_module_directory = _this_file.parents[1]
+    module_directory = _this_file.parents[1]
     config_directory = _this_file.parent
 
 ####################################################################################################
@@ -82,6 +83,5 @@ class Logging:
     ##############################################
 
     @staticmethod
-    def find(config_file):
-
+    def find(config_file: str) -> plPath:
         return PathTools.find(config_file, Logging.directories)

@@ -36,8 +36,8 @@ from QtShim.QtCore import (
 )
 
 # Fixme: Linux only
-from ImageBrowser.Thumbnail.FreeDesktop import ThumbnailCache, ThumbnailSize
-from ImageBrowser.ImageCollection import DirectoryCollection, Image
+from ImageBrowser.backend.thumbnail.FreeDesktop import ThumbnailCache, ThumbnailSize
+from ImageBrowser.backend.ImageCollection import DirectoryCollection, Image
 from .Runnable import Worker
 
 ####################################################################################################

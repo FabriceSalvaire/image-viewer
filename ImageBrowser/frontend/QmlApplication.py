@@ -51,8 +51,8 @@ from QtShim.QtQml import qmlRegisterUncreatableType
 # from QtShim.QtQuick import QQuickPaintedItem, QQuickView
 # from QtShim.QtQuickControls2 import QQuickStyle
 
-from ImageBrowser.Common.ArgparseAction import PathAction
-from ImageBrowser.Common.Platform import QtPlatform
+from ImageBrowser.common.ArgparseAction import PathAction
+from ImageBrowser.common.platform import QtPlatform
 from .ApplicationMetadata import ApplicationMetadata
 from .ApplicationSettings import ApplicationSettings, Shortcut
 from .KeySequenceEditor import KeySequenceEditor

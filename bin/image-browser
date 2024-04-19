@@ -23,15 +23,15 @@
 ####################################################################################################
 
 import logging
-from ImageBrowser.Common.Logging import Logging
-Logging.setup_logging()
+from ImageBrowser.logging import setup_logging
+setup_logging()
 
 _module_logger = logging.getLogger(__name__)
 _module_logger.info('Started Image Browser')
 
 ####################################################################################################
 
-from ImageBrowser.QtApplication.QmlApplication import Application
+from ImageBrowser.frontend.QmlApplication import Application
 
 ####################################################################################################
 
