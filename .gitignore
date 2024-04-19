@@ -3,6 +3,7 @@
 .directory
 __pycache__
 du.log
+__TRASH__
 
 MANIFEST
 build/
@@ -18,23 +19,16 @@ ImageBrowser/QtApplication/rcc/translations/image-browser.fr_FR.ts
 *.qm
 
 # TODO...
-.gitattributes
-.github/
-.travis.yml
 GPL-V3.0.txt
 ImageBrowser/Common/LoremIpsum.py
 ImageBrowser/ImageProcessing/
 ImageBrowser/QtApplication/rcc/icons/
 ImageBrowser/QtApplication/rcc/translations/
-MANIFEST.in
 QtShim/
 README.html
 README.rst
 README.txt
-__PLAN__.md
-__TRASH__/
 doc/
-gh-pages/
 open-doc.sh
 qml
 rcc
