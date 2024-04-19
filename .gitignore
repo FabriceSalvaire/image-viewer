@@ -19,16 +19,19 @@ ImageBrowser/QtApplication/rcc/translations/image-browser.fr_FR.ts
 *.qm
 
 # TODO...
-GPL-V3.0.txt
+README.html
+README.rst
+README.txt
+
 ImageBrowser/Common/LoremIpsum.py
 ImageBrowser/ImageProcessing/
 ImageBrowser/QtApplication/rcc/icons/
 ImageBrowser/QtApplication/rcc/translations/
+
 QtShim/
-README.html
-README.rst
-README.txt
+
 doc/
 open-doc.sh
+
 qml
 rcc
