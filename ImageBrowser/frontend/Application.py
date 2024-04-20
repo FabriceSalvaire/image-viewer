@@ -122,6 +122,7 @@ class Application(QObject):
         # Fixme: must be defined before QML
         #! self.load_collection(self._args.path)
 
+        # WARNING: This can solve a crash issue at startup
         if not self._args.no_qt_message_handler:
             qInstallMessageHandler(self._message_handler)
 
@@ -207,7 +208,7 @@ class Application(QObject):
             '--no-qt-message-handler',
             action='store_true',
             default=False,
-            help="don't install Qt message handler",
+            help="don't install Qt message handler (This can solve a crash issue at startup)",
         )
         # parser.add_argument(
         #     '--version',
@@ -256,6 +257,8 @@ class Application(QObject):
     ##############################################
 
     def _message_handler(self, msg_type: QtMsgType, context: QMessageLogContext, msg: str) -> None:
+        # Fixme: can crash at startup
+        method = None
         match msg_type:
             case QtMsgType.QtDebugMsg:
                 method = self._logger.debug
@@ -264,6 +267,8 @@ class Application(QObject):
             case QtMsgType.QtWarningMsg:
                 method = self._logger.warning
             case QtMsgType.QtCriticalMsg | QtMsgType.QtFatalMsg:
+                method = self._logger.critical
+            case _:
                 method = self._logger.critical
 
         msg = str(msg)
