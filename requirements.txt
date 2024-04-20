@@ -1,6 +1,6 @@
-Markdown>=3.0.1
-Pillow>=5.4
-PyQt5>=5.11
-PyYAML>=3.10
-langcodes>=1.4.1
-numpy>=1.16
+Pillow
+PySide6
+PyYAML
+numpy
+QtPy
+xattr
