@@ -2,6 +2,7 @@
 *~
 .directory
 __pycache__
+.pycache
 du.log
 __TRASH__
 
@@ -18,6 +19,11 @@ ImageBrowser/QtApplication/rcc/translations/image-browser.fr_FR.ts
 *.po
 *.qm
 
+qml
+rcc
+
+pyside-setup
+
 # TODO...
 README.html
 README.rst
@@ -28,10 +34,5 @@ ImageBrowser/backend/ImageProcessing/
 ImageBrowser/frontend/rcc/icons/
 ImageBrowser/frontend/rcc/translations/
 
-QtShim/
-
 doc/
 open-doc.sh
-
-qml
-rcc
