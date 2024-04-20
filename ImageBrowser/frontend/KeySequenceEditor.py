@@ -48,14 +48,16 @@
 
 import logging
 
-from PyQt5.QtCore import QMetaEnum
-from PyQt5.QtGui import QKeyEvent, QKeySequence
-from PyQt5.QtQuick import QQuickItem
+from qtpy.QtCore import Property, Signal, Slot, QObject, Qt, QMetaEnum
+from qtpy.QtGui import QKeyEvent, QKeySequence
+from qtpy.QtQml import QmlElement
+from qtpy.QtQuick import QQuickItem
 
-from QtShim.QtCore import (
-    Property, Signal, Slot, QObject,
-    Qt,
-)
+####################################################################################################
+
+QML_IMPORT_NAME = 'ImageBrowser'
+QML_IMPORT_MAJOR_VERSION = 1
+QML_IMPORT_MINOR_VERSION = 0   # Optional
 
 ####################################################################################################
 
@@ -76,6 +78,7 @@ def _key_name(index):
 
 ####################################################################################################
 
+@QmlElement
 class KeySequenceEditor(QQuickItem):
 
     _logger = _module_logger.getChild('KeySequenceEditor')

@@ -152,15 +152,14 @@ class QtPlatform(Platform):
     ##############################################
 
     def __init__(self):
-
         super().__init__()
 
         # Fixme: QT_VERSION_STR ...
-        from PyQt5 import QtCore, QtWidgets
-        # from QtShim import QtCore, QtWidgets
-
-        self.qt_version = QtCore.QT_VERSION_STR
-        self.pyqt_version = QtCore.PYQT_VERSION_STR
+        from qtpy import QtCore, QtWidgets
+ 
+        # AttributeError: module 'qtpy.QtCore' has no attribute 'QT_VERSION'
+        self.qt_version = '...'   # QtCore.QT_VERSION _STR
+        self.pyqt_version = '...'   # QtCore.PYQT_VERSION_STR
 
         # Screen
 

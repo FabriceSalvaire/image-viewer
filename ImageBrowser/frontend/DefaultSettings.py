@@ -27,7 +27,7 @@ __all__ = [
 
 from pathlib import Path
 
-from PyQt5.QtCore import QCoreApplication
+from qtpy.QtCore import QCoreApplication
 
 from ImageBrowser.config import ConfigInstall
 

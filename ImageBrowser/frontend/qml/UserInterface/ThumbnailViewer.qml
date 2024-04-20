@@ -65,7 +65,8 @@ Item {
                 Rectangle {
                     id: image_container
 
-                    property var image: modelData
+                    required property var modelData
+                    property var image: modelData //.image
 
                     property bool selected: false
                     property int border_width: 5

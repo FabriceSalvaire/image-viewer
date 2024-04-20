@@ -34,16 +34,20 @@ __all__ = [
 from typing import Iterator
 import logging
 
-# Fixme:
-from PyQt5.QtCore import QSettings
-from PyQt5.QtQml import QQmlListProperty
-from QtShim.QtCore import (
+from qtpy.QtCore import (
     Property, Signal, Slot, QObject,
-    # QUrl,
+    QSettings,
 )
+from qtpy.QtQml import QmlElement, QmlUncreatable, ListProperty
 
 from . import DefaultSettings
 from .DefaultSettings import Shortcuts
+
+####################################################################################################
+
+QML_IMPORT_NAME = 'ImageBrowser'
+QML_IMPORT_MAJOR_VERSION = 1
+QML_IMPORT_MINOR_VERSION = 0   # Optional
 
 ####################################################################################################
 
@@ -51,6 +55,8 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
+@QmlElement
+@QmlUncreatable('Shortcut')
 class Shortcut(QObject):
 
     _logger = _module_logger.getChild('Shortcut')
@@ -109,6 +115,8 @@ class Shortcut(QObject):
 
 ####################################################################################################
 
+@QmlElement
+@QmlUncreatable('ApplicationSettings')
 class ApplicationSettings(QSettings):
 
     """Class to implement application settings."""
@@ -165,9 +173,9 @@ class ApplicationSettings(QSettings):
 
     ##############################################
 
-    @Property(QQmlListProperty, constant=True)
-    def shortcuts(self) -> QQmlListProperty:
-        return QQmlListProperty(Shortcut, self, self._shortcuts)
+    # @Property(QQmlListProperty, constant=True)
+    # def shortcuts(self) -> QQmlListProperty:
+    #     return QQmlListProperty(Shortcut, self, self._shortcuts)
 
     ##############################################
 

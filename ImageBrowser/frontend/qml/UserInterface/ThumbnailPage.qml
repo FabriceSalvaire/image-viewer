@@ -42,7 +42,7 @@ Page {
         id: thumbnail_viewer
         anchors.fill: parent
 
-        thumbnail_model: application.collection.images
+        thumbnail_model: application.collection //.images
 
         onShow_image: {
             image_viewer.to_image(index)

@@ -28,12 +28,14 @@ import logging
 import subprocess
 import time
 
-from PyQt5.QtCore import QCoreApplication, QFileSystemWatcher
-from PyQt5.QtQml import QQmlListProperty
-from QtShim.QtCore import (
+from qtpy.QtCore import (
+    Qt,
+    QAbstractListModel,
+    QFileSystemWatcher,
     Property, Signal, Slot, QObject,
-    Qt, QTimer, QUrl
+    QByteArray,
 )
+from qtpy.QtQml import QmlElement, QmlUncreatable, ListProperty
 
 # Fixme: Linux only
 from ImageBrowser.backend.thumbnail.FreeDesktop import ThumbnailCache, ThumbnailSize
@@ -42,14 +44,20 @@ from .Runnable import Worker
 
 ####################################################################################################
 
-_module_logger = logging.getLogger(__name__)
+QML_IMPORT_NAME = 'ImageBrowser'
+QML_IMPORT_MAJOR_VERSION = 1
+QML_IMPORT_MINOR_VERSION = 0   # Optional
 
 ####################################################################################################
+
+_module_logger = logging.getLogger(__name__)
 
 thumbnail_cache = ThumbnailCache()
 
 ####################################################################################################
 
+@QmlElement
+@QmlUncreatable('QmlImage')
 class QmlImage(QObject):
 
     _logger = _module_logger.getChild('QmlImage')
@@ -132,7 +140,10 @@ class QmlImage(QObject):
 
 ####################################################################################################
 
-class QmlImageCollection(QObject):
+@QmlElement
+@QmlUncreatable('QmlImageCollection')
+# class QmlImageCollection(QObject):
+class QmlImageCollection(QAbstractListModel):
 
     new_image = Signal(int)
 
@@ -140,11 +151,12 @@ class QmlImageCollection(QObject):
 
     ##############################################
 
-    def __init__(self, path: str) -> None:
-        super().__init__()
+    def __init__(self, path: str, parent=None) -> None:
+        super().__init__(parent)
         self._collection = DirectoryCollection(path)
         # We must prevent garbage collection
         self._images = [QmlImage(self, image) for image in self._collection]
+        # self.reset()
 
     ##############################################
 
@@ -177,9 +189,62 @@ class QmlImageCollection(QObject):
 
     images_changed = Signal()
 
-    @Property(QQmlListProperty, notify=images_changed)
-    def images(self):
-        return QQmlListProperty(QmlImage, self, self._images)
+    # https://doc.qt.io/qtforpython-6/examples/example_qml_tutorials_extending-qml_chapter5-listproperties.html
+    # https://doc.qt.io/qtforpython-6/PySide6/QtQml/QQmlListReference.html#PySide6.QtQml.QQmlListReference
+    # https://doc.qt.io/qt-6/qqmllistproperty.html
+    # https://doc.qt.io/qt-6/qqmllistreference.html
+    # ListProperty(QObject, append=None, at=None, count=None, replace=None, clear=None, removeLast=None)
+
+    # @Property(QQmlListProperty, notify=images_changed)
+    # def images(self):
+    #     return QQmlListProperty(QmlImage, self, self._images)
+
+    def rowCount(self, parent=None) -> int:
+        _= len(self._images)
+        self._logger.info(f"= {_}")
+        return _
+
+    # def at(self, index: int) -> QmlImage:
+    #     return self._images[index]
+
+    ImageRole = Qt.UserRole + 1
+
+    def roleNames(self):
+        # required by Repeater
+        # https://bugreports.qt.io/browse/PYSIDE-2698
+        self._logger.info(f"ImageRole {self.ImageRole}")
+        return {
+            self.ImageRole: QByteArray(b'image...'),
+        }
+        # default = super().roleNames()
+        # default[self.RatioRole] = QByteArray(b"ratio")
+
+    def data(self, index, role: int = Qt.DisplayRole) -> QmlImage:
+        # if role == Qt.DisplayRole:
+        _ = index.row()
+        self._logger.info(f"index {_} role {role}")
+        return self._images[_]
+        # return None
+
+    # @Slot(result=bool)
+    # def reset(self) -> bool:
+    #     self._logger.info("")
+    #     self.beginResetModel()
+    #     # self.resetInternalData()  # should work without calling it ?
+    #     self.endResetModel()
+    #     return True
+
+    # images = ListProperty(
+    #     QmlImage,
+    #     append=None,
+    #     at=at,
+    #     count=rowCount,
+    #     replace=None,
+    #     clear=None,
+    #     removeLast=None,
+    #     notify=images_changed,
+    #     final=True,
+    # )
 
     ##############################################
 
@@ -206,42 +271,42 @@ class QmlImageCollection(QObject):
 
     ##############################################
 
-    def start_watcher(self, watcher=None):
-        self._files = set(self._glob_files())
-        self._watcher = watcher or QFileSystemWatcher()
-        self._watcher.addPath(str(self._collection.path))
-        self._watcher.directory_changed.connect(self._on_directory_change)
+    # def start_watcher(self, watcher=None):
+    #     self._files = set(self._glob_files())
+    #     self._watcher = watcher or QFileSystemWatcher()
+    #     self._watcher.addPath(str(self._collection.path))
+    #     self._watcher.directory_changed.connect(self._on_directory_change)
 
     ##############################################
 
-    def _glob_files(self):
-        pattern = str(self._collection.path.joinpath('*' + self._collection.extension))
-        for path in glob.glob(pattern):
-            yield Path(path).name
+    # def _glob_files(self):
+    #     pattern = str(self._collection.path.joinpath('*' + self._collection.extension))
+    #     for path in glob.glob(pattern):
+    #         yield Path(path).name
 
     ##############################################
 
-    def _on_directory_change(self, path):
-        time.sleep(3)
-        # QTimer::singleShot(200, this, SLOT(updateCaption()));
-        files = set(self._glob_files())
-        new_files = files - self._files
-        self._logger.info('New files {}'.format(new_files))
-        # Fixme: overwrite
-        for filename in new_files:
-            self._on_new_file(filename)
-        self._files = files
+    # def _on_directory_change(self, path):
+    #     time.sleep(3)
+    #     # QTimer::singleShot(200, this, SLOT(updateCaption()));
+    #     files = set(self._glob_files())
+    #     new_files = files - self._files
+    #     self._logger.info('New files {}'.format(new_files))
+    #     # Fixme: overwrite
+    #     for filename in new_files:
+    #         self._on_new_file(filename)
+    #     self._files = files
 
     ##############################################
 
-    def _on_new_file(self, filename):
-        self._logger.info('New file {}'.format(filename))
-        # try:
-        image = self._collection.add_image(filename)
-        image._index = self._collection.number_of_images   # Fixme: !!!
-        self._logger.info('New image\n{}'.format(image))
-        self._images.append(QmlImage(self, image))
-        self.number_of_images_changed.emit()
-        self.new_image.emit(image.index)
-        # except Exception as exception:
-        #     self._logger.warning('Error on {}\n{}'.format(filename, exception))
+    # def _on_new_file(self, filename):
+    #     self._logger.info('New file {}'.format(filename))
+    #     # try:
+    #     image = self._collection.add_image(filename)
+    #     image._index = self._collection.number_of_images   # Fixme: !!!
+    #     self._logger.info('New image\n{}'.format(image))
+    #     self._images.append(QmlImage(self, image))
+    #     self.number_of_images_changed.emit()
+    #     self.new_image.emit(image.index)
+    #     # except Exception as exception:
+    #     #     self._logger.warning('Error on {}\n{}'.format(filename, exception))

@@ -23,7 +23,7 @@ import QtQuick.Controls 2.4
 
 ToolButton {
     // property alias tip: ToolTip.text
-    property string tip: null
+    property string tip: ''
     property int size: 22
 
     icon.height: size
@@ -32,6 +32,6 @@ ToolButton {
     hoverEnabled: tip
     ToolTip.delay: 1000
     ToolTip.timeout: 5000
-    ToolTip.visible: hovered
+    ToolTip.visible: enabled && hovered
     ToolTip.text: tip
 }
