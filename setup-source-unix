@@ -19,11 +19,12 @@ echo $rule
 echo Generate image-browser.rcc and ImageBrowserRessource.py
 echo
 
-pushd share # move to
+pushd rcc # move to
 
-make # same as
+# make # same as
 # rcc-qt5 -binary image-browser.qrc -o image-browser.rcc
 # pyrcc5 -o ImageBrowserRessource.py image-browser.qrc
+pyside6-rcc -o ImageBrowserRessource.py image-browser.qrc
 
 popd # go back
 
