@@ -239,6 +239,13 @@ class Thumbnail:
     ##############################################
 
     def has_thumbnail(self, size: ThumbnailSize) -> bool:
+        # Fixme: compare the original file's size and modification time
+        #        with the attribytes stored in the 'Thumb::MTime' and 'Thumb::Size' keys
+        #   if ((!thumb.isShared && !isSet(thumb.MTime)) ||
+        #       (isSet(thumb.MTime) && file.mtime != thumb.MTime) ||
+        #       (isSet(thumb.Size) && file.size != thumb.Size) {
+        #     recreate_thumbnail();
+        #   }
         path = self.thumbnail_path(size)
         if path.exists():
             stat = path.stat()
@@ -292,7 +299,10 @@ class Thumbnail:
     ##############################################
 
     def _make_thumbnail(self, dst_path: Path, size: int) -> None:
-        # Fixme: async
+        # Fixme:
+        #  async
+        #  convert
+        #  atomic rename tmp
         image = Image.open(str(self._source_path))
         image.thumbnail((size, size), resample=self.SAMPLING)
         png_info = self._make_png_info()
