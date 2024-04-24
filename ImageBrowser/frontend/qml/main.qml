@@ -190,9 +190,11 @@ ApplicationWindow {
 
         function set_thumbnail_page() { currentIndex = 0 }
         function set_viewer_page() { currentIndex = 1 }
+        function set_test_page() { currentIndex = 2 }
 
         Component.onCompleted: {
-            set_thumbnail_page()
+            // set_thumbnail_page()
+            set_test_page()
         }
 
         // Fixme: simplify with Page { Widget{} } ???
@@ -203,6 +205,10 @@ ApplicationWindow {
 
         Ui.ImageViewerPage {
             id: image_viewer_page
+        }
+
+        Ui.TestPage {
+            id: test_page
         }
     }
 

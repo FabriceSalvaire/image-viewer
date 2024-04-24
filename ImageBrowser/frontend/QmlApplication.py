@@ -41,6 +41,7 @@ from qtpy.QtQml import QmlElement, QmlUncreatable
 
 from .ApplicationMetadata import ApplicationMetadata
 from .QmlImageCollection import QmlImageCollection
+from .QmlFileSystemModel import QmlFileSystemModel
 
 if TYPE_CHECKING:
     from .Application import Application
@@ -78,6 +79,7 @@ class QmlApplication(QObject):
     def __init__(self, application: 'Application') -> None:
         super().__init__()
         self._application = application
+        self._file_system_model = QmlFileSystemModel()
 
     ##############################################
 
@@ -101,6 +103,13 @@ class QmlApplication(QObject):
     @Property(str, constant=True)
     def about_message(self) -> str:
         return ApplicationMetadata.about_message()
+
+    ##############################################
+
+    @Property(QmlFileSystemModel, constant=True, final=True)
+    def file_system_model(self) -> QmlFileSystemModel:
+        self._logger.info("")
+        return self._file_system_model
 
     ##############################################
 
