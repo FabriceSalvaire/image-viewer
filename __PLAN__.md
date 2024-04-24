@@ -9,6 +9,7 @@
   check datasheet
   look at async...
 - test
+- spdx
 
 # Bugs
 
@@ -143,3 +144,7 @@ A directory can have sub-collections (sub-directory).
 
 -[libPGF – Progressive Graphics File](https://libpgf.or/)
  [Progressive Graphics File - Wikipedia](https://en.wikipedia.org/wiki/Progressive_Graphics_File)
+- [Exiv2 - Image metadata library and tools](https://exiv2.org)
+- [gPhoto](http://www.gphoto.org)
+- [Lensfun](https://lensfun.github.io)
+- [LibRaw](https://www.libraw.org)
