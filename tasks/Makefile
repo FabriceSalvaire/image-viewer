@@ -1,15 +1,17 @@
 # -*- Makefile -*-
 
+# Fixme: task
+
 ####################################################################################################
 
-all: image-browser.rcc ImageBrowserRessource.py
+all: application.rcc Ressource.py
 
 ####################################################################################################
 
 %.rcc : %.qrc
 	rcc-qt5 -binary $< -o $@
 
-ImageBrowserRessource.py : image-browser.qrc
+Ressource.py : application.qrc
 	pyrcc5 -o $@ $<
 
 ####################################################################################################

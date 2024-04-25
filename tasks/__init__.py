@@ -11,15 +11,22 @@
 ####################################################################################################
 
 from invoke import task, Collection
- # import sys
+# import sys
+
+####################################################################################################
+
+# SOURCE_PATH = Path(__file__).resolve().parent
 
 ####################################################################################################
 
 from . import clean
 from . import doc
-from . import release
+from . import qt
+from . import icon
 
 ns = Collection()
+# Fixme: find generic code somewhere ...
 ns.add_collection(Collection.from_module(clean))
-ns.add_collection(Collection.from_module(release))
 ns.add_collection(Collection.from_module(doc))
+ns.add_collection(Collection.from_module(qt))
+ns.add_collection(Collection.from_module(icon))

@@ -1,4 +1,10 @@
-#! /usr/bin/env python3
+####################################################################################################
+#
+# ImageBrowser — ...
+# Copyright (C) 2024 Fabrice SALVAIRE
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+####################################################################################################
 
 ####################################################################################################
 
@@ -26,40 +32,10 @@
 
 from pathlib import Path
 from zipfile import ZipFile
-import argparse
 import os
 import shutil
 import tempfile
 import urllib3
-
-####################################################################################################
-
-parser = argparse.ArgumentParser(description='Fetch material icon.')
-
-parser.add_argument(
-    'src_name', metavar='NAME',
-    help='icon name',
-)
-
-parser.add_argument(
-    '--dst-name',
-    default=None,
-    help='dst name, default is same name',
-)
-
-parser.add_argument(
-    '--style',
-    default='baseline',
-    help='style: [baseline], outline, round, twotone, sharp',
-)
-
-parser.add_argument(
-    '--color',
-    default='black',
-    help='color: [black], white',
-)
-
-args = parser.parse_args()
 
 ####################################################################################################
 
@@ -69,13 +45,14 @@ urllib3.disable_warnings()
 
 class MaterialIconFetcher:
 
+    BASE_URL = 'https://fonts.gstatic.com/s/i/materialicons'
+
     SCALE = (1, 2)
     DP = (18, 24, 36, 48)
 
     ##############################################
 
-    def __init__(self, icons_path, theme):
-
+    def __init__(self, icons_path: str, theme: str) -> None:
         self._icons_path = Path(str(icons_path)).resolve()
         self._theme = str(theme)
         self._theme_path = self._icons_path.joinpath(self._theme)
@@ -94,91 +71,63 @@ class MaterialIconFetcher:
 
     ##############################################
 
-    def _fetch_ressource(self, url):
+    def _fetch_ressource(self, url: str) -> bytes:
         print('Fetch', url, '...')
         request = self._http.request('GET', url)
         return request.data
 
     ##############################################
 
-    def _fetch_png_icon(self, **kwargs):
-
-        # https://material.io/tools/icons/static/icons/baseline-save-black-36.zip
-        root = 'https://material.io/tools/icons/static/icons/'
-        url_pattern = '{style}-{name}-{color}-{dp}.zip'
-        filename = url_pattern.format(**kwargs)
-        url = root + filename
-
+    def _fetch_png_icon(self, name: str, color: str, dp: int, version: int) -> list[str, bytes]:
+        # https://fonts.gstatic.com/s/i/materialicons/picture_as_pdf/v12/24px.svg
+        # https://fonts.gstatic.com/s/i/materialicons/picture_as_pdf/v12/black-24dp.zip
+        #   2x/baseline_picture_as_pdf_black_24dp.png
+        #   1x/baseline_picture_as_pdf_black_24dp.png
+        filename = f'{color}-{dp}dp.zip'
+        url = f'{self.BASE_URL}/{name}/v{version}/{filename}'
         data = self._fetch_ressource(url)
-
         return filename, data
 
     ##############################################
 
-    def _extract_png_archive(self, **kwargs):
-
-            filename, data = self._fetch_png_icon(**kwargs)
-            zip_path = self._tmp_directory_path.joinpath(filename)
-            with open(zip_path, 'wb') as fh:
-                fh.write(data)
-            with ZipFile(zip_path, 'r') as zip_archive:
-                zip_archive.extractall(self._tmp_directory_path)
+    def _extract_png_archive(self, name: str, color: str, dp: int, version: int) -> None:
+        filename, data = self._fetch_png_icon(name=name, color=color, dp=dp, version=version)
+        zip_path = self._tmp_directory_path.joinpath(filename)
+        with open(zip_path, 'wb') as fh:
+            fh.write(data)
+        with ZipFile(zip_path, 'r') as zip_archive:
+            zip_archive.extractall(self._tmp_directory_path)
 
     ##############################################
 
-    def fetch_icon(self, src_name, dst_name, style, color):
-
-        kwargs = dict(src_name=src_name, dst_name=dst_name, style=style, color=color)
-
+    def fetch_icon(self, src_name: str, dst_name: str, style: str, color: str, version: int) -> None:
         for dp in self.DP:
-            self._extract_png_archive(name=src_name, dp=dp, **kwargs)
+            self._extract_png_archive(name=src_name, dp=dp, color=color, version=version)
 
         print()
         for scale in self.SCALE:
             for dp in self.DP:
-                dst_kwargs = dict(kwargs)
-                dst_kwargs.update(dict(scale=scale, dp=dp))
-
                 # 1x/baseline_save_black_18dp.png
-                filename_pattern = '{style}_{src_name}_{color}_{dp}dp.png'
                 src_path = self._tmp_directory_path.joinpath(
-                    '{scale}x'.format(**dst_kwargs),
-                    filename_pattern.format(**dst_kwargs),
+                    f'{scale}x',
+                    f'{style}_{src_name}_{color}_{dp}dp.png'
                 )
 
                 if scale > 1:
-                    size_directory = '{dp}x{dp}@{scale}'.format(**dst_kwargs)
+                    size_directory = f'{dp}x{dp}@{scale}'
                 else:
-                    size_directory = '{dp}x{dp}'.format(**dst_kwargs)
+                    size_directory = f'{dp}x{dp}'
                 size_path = self._theme_path.joinpath(size_directory)
                 if not size_path.exists():
                     os.mkdir(size_path)
-                filename_pattern = '{dst_name}-{color}.png'
-                filename = filename_pattern.format(**dst_kwargs)
+                filename = f'{dst_name}-{color}.png'
                 dst_path = size_path.joinpath(filename)
 
                 # print('Copy', src_path, dst_path)
                 shutil.copyfile(src_path, dst_path)
 
-                rcc_pattern = '<file>icons/{}/{}/{}</file>'
-                rcc_line = rcc_pattern.format(self._theme, size_directory, filename)
+                rcc_line = f'<file>icons/{self._theme}/{size_directory}/{filename}</file>'
                 if dp != 36:
-                    rcc_line = '<!-- {} -->'.format(rcc_line)
+                    rcc_line = f'<!-- {rcc_line} -->'
                 rcc_line = ' '*8 + rcc_line
                 print(rcc_line)
-
-####################################################################################################
-
-root_path = Path(__file__).resolve().parents[1]
-icons_path = root_path.joinpath('share', 'icons')
-theme = 'material'
-print('Icons path:', icons_path, theme)
-
-fetcher = MaterialIconFetcher(icons_path, theme)
-
-fetcher.fetch_icon(
-    args.src_name,
-    args.dst_name or args.src_name.replace('_', '-'),
-    args.style,
-    args.color,
-)
