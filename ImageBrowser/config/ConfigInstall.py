@@ -11,13 +11,16 @@ __all__ = ['Path', 'Logging']
 ####################################################################################################
 
 from pathlib import Path as plPath
+import logging
 import sys
+
+# due to Path class
+from ImageBrowser.library.path.find import find
 
 ####################################################################################################
 
-# due to Path class
-# require PathTools.find
-from ImageBrowser.common import PathTools
+logger = logging.getLogger('root.main')
+logger.info(f"Load {__name__}")
 
 ####################################################################################################
 
@@ -51,6 +54,7 @@ class OsFactory:
     def on_osx(self) -> bool:
         return self._name == 'osx'
 
+
 OS = OsFactory()
 
 ####################################################################################################
@@ -72,4 +76,4 @@ class Logging:
 
     @staticmethod
     def find(config_file: str) -> plPath:
-        return PathTools.find(config_file, Logging.directories)
+        return find(config_file, Logging.directories)

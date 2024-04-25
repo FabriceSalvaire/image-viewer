@@ -25,22 +25,23 @@ import sys
 
 import yaml
 
-####################################################################################################
-
 from ImageBrowser.config import ConfigInstall
 
 ####################################################################################################
 
 LEVEL_ENV = 'ImageBrowserLogLevel'
+APPLICATION_NAME = 'ImageBrowser'
 
 def setup_logging(
-    application_name: str = 'ImageBrowser',
+    application_name: str = APPLICATION_NAME,
     config_file: str | Path = ConfigInstall.Logging.default_config_file,
     logging_level: Optional[int] = None,
 ) -> logging.Logger:
 
-    logging_config_file_name = ConfigInstall.Logging.find(config_file)
-    with open(logging_config_file_name, 'r', encoding='utf8') as fh:
+    config_file = Path(config_file)
+    if not config_file.exists():
+        config_file = ConfigInstall.Logging.find(str(config_file))
+    with open(config_file, 'r', encoding='utf8') as fh:
         logging_config = yaml.load(fh, Loader=yaml.SafeLoader)
 
     # Fixme: \033 is not interpreted in YAML
@@ -71,5 +72,16 @@ def setup_logging(
         # level can be int or string
         logger.setLevel(logging_level)
     # else use logging.yml
+
+    logger.info(f"Loaded {config_file}")
+    level = {
+        logging.NOTSET: 'NOTSET',
+        logging.DEBUG: 'DEBUG',
+        logging.INFO: 'INFO',
+        logging.WARNING: 'WARNING',
+        logging.ERROR: 'ERROR',
+        logging.CRITICAL: 'CRITICAL',
+    }[logger.level]
+    logger.info(f"Level is {level}")
 
     return logger

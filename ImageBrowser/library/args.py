@@ -12,9 +12,7 @@
 
 ####################################################################################################
 
-__all__ = [
-    'PathAction',
-]
+__all__ = ['PathAction']
 
 ####################################################################################################
 
@@ -29,11 +27,10 @@ class PathAction(argparse.Action):
 
     ##############################################
 
-    def __call__(self, parser, namespace, values, option_string=None):
-
+    def __call__(self, parser, namespace, values, option_string=None) -> Path:
         if values is not None:
             if isinstance(values, list):
-                path = [Path(x) for x in values]
+                path = [Path(_) for _ in values]
             else:
                 path = Path(values)
         else:

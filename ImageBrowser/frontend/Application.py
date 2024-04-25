@@ -18,7 +18,7 @@ __all__ = ['Application']
 
 # import datetime
 from pathlib import Path
-import argparse
+# from typing import TYPE_CHECKING
 import logging
 import os
 import sys
@@ -38,11 +38,10 @@ from qtpy.QtQml import QQmlApplicationEngine
 from qtpy.QtWidgets import QApplication
 # from qtpy.QtQuickControls2 import QQuickStyle
 
-from ImageBrowser.common.ArgparseAction import PathAction
-from ImageBrowser.common.platform import QtPlatform
+from ImageBrowser.library.os.platform import QtPlatform
 from .ApplicationMetadata import ApplicationMetadata
 from .QmlApplication import QmlApplication
-from .ApplicationSettings import ApplicationSettings, Shortcut
+from .ApplicationSettings import ApplicationSettings   # , Shortcut
 from .QmlImageCollection import QmlImageCollection
 
 # Load Resources
@@ -52,10 +51,13 @@ from .rcc import ImageBrowserRessource
 # Register for QML
 from .KeySequenceEditor import KeySequenceEditor
 
+# if TYPE_CHECKING:
+from .ApplicationArgs import ApplicationArgs
+
 ####################################################################################################
 
 _module_logger = logging.getLogger(__name__)
-_module_logger.info('Qt binding is %s %s', qtpy.API_NAME, QtCore.__version__)
+_module_logger.info(f"Qt binding is {qtpy.API_NAME} v{QtCore.__version__}")
 
 type PathOrStr = Union[Path, str]
 
@@ -77,20 +79,18 @@ class Application(QObject):
 
     ##############################################
 
-    @classmethod
-    def setup_gui_application(self) -> None:
-        # https://bugreports.qt.io/browse/QTBUG-55167
-        # for path in (
-        #         'qt.qpa.xcb.xcberror',
-        # ):
-        #     QLoggingCategory.setFilterRules('{} = false'.format(path))
-        # QQuickStyle.setStyle('Material')
-        pass
+    # @classmethod
+    # def setup_gui_application(self) -> None:
+    #     https://bugreports.qt.io/browse/QTBUG-55167
+    #     for path in (
+    #             'qt.qpa.xcb.xcberror',
+    #     ):
+    #         QLoggingCategory.setFilterRules('{} = false'.format(path))
+    #     QQuickStyle.setStyle('Material')
 
     ##############################################
 
     # Fixme: Singleton
-
     @classmethod
     def create(cls, *args: list, **kwargs: dict) -> 'Application':
         if cls.instance is not None:
@@ -100,11 +100,12 @@ class Application(QObject):
 
     ##############################################
 
-    def __init__(self) -> None:
+    # Use create to get an instance
+    def __init__(self, args: ApplicationArgs) -> None:
         self._logger.info('Ctor')
         super().__init__()
 
-        self._parse_arguments()
+        self._args = args
 
         self._collection = None
         # Fixme: must be defined before QML
@@ -185,54 +186,6 @@ class Application(QObject):
     @property
     def collection(self) -> QmlImageCollection:
         return self._collection
-
-    ##############################################
-
-    def _parse_arguments(self) -> None:
-        parser = argparse.ArgumentParser(
-            description='ImageBrowser',
-        )
-        parser.add_argument(
-            '--no-qt-message-handler',
-            action='store_true',
-            default=False,
-            help="don't install Qt message handler (This can solve a crash issue at startup)",
-        )
-        # parser.add_argument(
-        #     '--version',
-        #     action='store_true', default=False,
-        #     help="show version and exit",
-        # )
-        # Fixme: should be able to start application without !!!
-        parser.add_argument(
-            'path', metavar='PATH',
-            action=PathAction,
-            help='collection path',
-        )
-        parser.add_argument(
-            '--dont-translate',
-            action='store_true',
-            default=False,
-            help="Don't translate application",
-        )
-        parser.add_argument(
-            '--user-script',
-            action=PathAction,
-            default=None,
-            help='user script to execute',
-        )
-        parser.add_argument(
-            '--user-script-args',
-            default='',
-            help="user script args (don't forget to quote)",
-        )
-        # parser.add_argument(
-        #     '--watcher',
-        #     action='store_true',
-        #     default=False,
-        #     help='start watcher',
-        # )
-        self._args = parser.parse_args()
 
     ##############################################
 
