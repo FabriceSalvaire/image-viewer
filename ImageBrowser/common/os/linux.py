@@ -33,8 +33,10 @@ __ALL__ = ['MountPoints', 'Device']
 from pathlib import Path
 from pprint import pprint
 from typing import Iterator, Union
+import collections
 import json
 import logging
+import os
 import subprocess
 
 from ImageBrowser.common.singleton import SingletonMetaClass
@@ -47,76 +49,11 @@ type PathStr = Union[Path, str]
 
 ####################################################################################################
 
-class Device():
+class LsblkInterface():
 
-    ##############################################
+    _logger = _module_logger.getChild('LsblkInterface')
 
-    def __init__(
-        self,
-        name: str,   # device name e.g. /dev/sda1
-        uuid: str,
-        label: str,
-        major: int,
-        minor: int,
-        fs_type: str,
-        mount_points: list[str],
-    ) -> None:
-        self._name = str(name)
-        self._uuid = str(uuid)
-        self._label = str(label) if label is not None else None
-        self._major = int(self._major)
-        self._minor = int(self._minor)
-        self._fs_type = str(fs_type)
-        self._mount_points = [str(_) for _ in mount_points]
-
-    ##############################################
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def uuid(self) -> str:
-        return self._uuid
-
-    @property
-    def label(self) -> str:
-        return self._label
-
-    @property
-    def major(self) -> int:
-        return self._major
-
-    @property
-    def minor(self) -> int:
-        return self._minor
-
-    @property
-    def major_minor(self) -> str:
-        return f'{self._major}:{self._minor}'
-
-    @property
-    def fs_type(self) -> str:
-        return self._fs_type
-
-    @property
-    def mount_points(self) -> Iterator[str]:
-        return iter(self._mount_points)
-
-    def __str__(self) -> str:
-        return f"Device '{self._name}'  {self.major_minor}  uuid={self._uuid}  label='{self._label}'  fstype={self._fs_type}  mounts={self._mount_points}"
-        # f"{self._mount_point} ->"
-
-####################################################################################################
-
-class MountPoints(metaclass=SingletonMetaClass):
-
-    _logger = _module_logger.getChild('MountPoints')
-
-    # MOUNT_COMMAND = ('/usr/bin/mount')
     LSBLK = '/usr/bin/lsblk'
-
-    # PROC_MOUNTS = '/proc/self/mounts'
 
     FILE_SYSTEM_TYPES = (
         'btrfs',
@@ -157,58 +94,186 @@ class MountPoints(metaclass=SingletonMetaClass):
         'tracefs',
     )
 
+    DeviceInfo = collections.namedtuple(
+        'DeviceInfo',
+        (
+            'name',
+            'uuid',
+            'label',
+            'major',
+            'minor',
+            'fs_type',
+            'mount_points'
+        ))
+
+    ##############################################
+
+    def __init__(self) -> None:
+        self._logger.info(f"Scan mount points...")
+        # lsblk is unable to return all the informations with one call...
+        # thus we have to merge
+        devices = {_.name: _ for _ in self.process(self.run())}
+        self._devices = []
+        for d in self.process(self.run('--fs')):
+            if d.fs_type in self.FILE_SYSTEM_TYPES:
+                _ = devices[d.name]
+                device = d._replace(
+                    major=_.major,
+                    minor=_.minor,
+                )
+                self._devices.append(device)
+
+    ##############################################
+
+    @property
+    def devices(self) -> Iterator[DeviceInfo]:
+        return iter(self._devices)
+
+    ##############################################
+
+    def run(self, *args) -> dict:
+        command = (self.LSBLK, '--json', *args)
+        process = subprocess.run(command, capture_output=True)
+        data = process.stdout.decode('utf8')
+        return json.loads(data)
+
+    ##############################################
+
+    def process_node(self, node: dict) -> Iterator[DeviceInfo]:
+        # print('-'*50)
+        # pprint(node)
+        name = node['name']
+        mount_points = node['mountpoints']
+        major = None
+        minor = None
+        label = None
+        uuid = None
+        fs_type = None
+        if mount_points != [None]:
+            if 'maj:min' in node:
+                major, minor = [int(_) for _ in node['maj:min'].split(':')]
+            else:
+                label = node['label']
+                uuid = node['uuid']
+                fs_type = node['fstype']
+                if fs_type is not None and fs_type not in self.FILE_SYSTEM_TYPES and fs_type not in self.SPECIAL_TYPES:
+                    self._logger.warning(f"Unknown filesytem type {fs_type}")
+            yield self.DeviceInfo(
+                name=name,
+                uuid=uuid,
+                label=label,
+                major=major,
+                minor=minor,
+                fs_type=fs_type,
+                mount_points=mount_points,
+            )
+        if 'children' in node:
+            for _ in node['children']:
+                yield from self.process_node(_)
+
+    ##############################################
+
+    def process(self, data: dict) -> Iterator[DeviceInfo]:
+        for node in data['blockdevices']:
+            yield from self.process_node(node)
+
+####################################################################################################
+
+class Device():
+
+    ##############################################
+
+    @classmethod
+    def to_major_minor_int(cls, major: int, minor: int) -> int:
+        return major << 16 + minor
+
+    ##############################################
+
+    def __init__(
+        self,
+        name: str,   # device name e.g. /dev/sda1
+        uuid: str,   # partition uuid
+        label: str,  # partition label
+        major: int,  # identifies the driver associated with the device
+        minor: int,
+        fs_type: str,
+        mount_points: list[str],
+    ) -> None:
+        self._name = str(name)
+        self._uuid = str(uuid)
+        self._label = str(label) if label is not None else None
+        self._major = int(major)
+        self._minor = int(minor)
+        self._fs_type = str(fs_type)
+        self._mount_points = [str(_) for _ in mount_points]
+
+    ##############################################
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def uuid(self) -> str:
+        return self._uuid
+
+    @property
+    def label(self) -> str:
+        return self._label
+
+    @property
+    def major(self) -> int:
+        return self._major
+
+    @property
+    def minor(self) -> int:
+        return self._minor
+
+    @property
+    def major_minor_str(self) -> str:
+        return f'{self._major}:{self._minor}'
+
+    @property
+    def major_minor_int(self) -> int:
+        return self.to_major_minor_int(self._major, self._minor)
+
+    @property
+    def fs_type(self) -> str:
+        return self._fs_type
+
+    @property
+    def mount_points(self) -> Iterator[str]:
+        return iter(self._mount_points)
+
+    def __str__(self) -> str:
+        return f"Device '{self._name}'  major:minor={self.major_minor_str}  uuid={self._uuid}  label='{self._label}'  fstype={self._fs_type}  mounts={self._mount_points}"
+        # f"{self._mount_point} ->"
+
+####################################################################################################
+
+class MountPoints(metaclass=SingletonMetaClass):
+
+    _logger = _module_logger.getChild('MountPoints')
+
     ##############################################
 
     def __init__(self) -> None:
         self._devices = list(self._get_devices())
-        self._map = {
+        self._mount_map = {
             m: d
             for d in self._devices
             for m in d.mount_points
+        }
+        self._majmin_map = {
+            d.major_minor_int: d
+            for d in self._devices
         }
 
     ##############################################
 
     def _get_devices(self) -> Iterator[Device]:
-        self._logger.info(f"Scan mount points...")
-        command = (self.LSBLK, '--json', '--fs')
-        process = subprocess.run(command, capture_output=True)
-        data = process.stdout.decode('utf8')
-        data = json.loads(data)
-
-        def process_node(node):
-            # print('-'*50)
-            pprint(node)
-            fs_type = node['fstype']
-            mount_points = node['mountpoints']
-            name = node['name']
-            label = node['label']
-            uuid = node['uuid']
-            if fs_type is not None and fs_type not in self.FILE_SYSTEM_TYPES and fs_type not in self.SPECIAL_TYPES:
-                self._logger.warning(f"Unknown filesytem type {fs_type}")
-            if mount_points != [None] and fs_type in self.FILE_SYSTEM_TYPES:
-                # if 'maj:min' in node:
-                #     major, minor = [int(_) for _ in node['maj:min'].split(':')]
-                # else:
-                #     raise NameError(f"no major:minor for {name}")
-                major, minor = None
-                yield Device(name, uuid, label, major, minor, fs_type, mount_points)
-            if 'children' in node:
-                for _ in node['children']:
-                    yield from process_node(_)
-
-        for node in data['blockdevices']:
-            yield from process_node(node)
-
-        # process = subprocess.run(self.MOUNT_COMMAND, capture_output=True)
-        # for line in process.stdout.decode('utf-8').splitlines():
-        #     device, _, mount_point, _, type_, mount_options = line.split(' ')
-        #     if type_ not in self.SYSTEM_TYPES:
-
-        # with open(self.PROC_MOUNTS, encoding='utf8') as fh:
-        #     for line in fh:
-        #         device, mount_point, type_, mount_options, _, _ = line.split(' ')
-        #         if type_ not in self.SYSTEM_TYPES:
+        for _ in LsblkInterface().devices:
+            yield Device(**_._asdict())
 
     ##############################################
 
@@ -232,8 +297,7 @@ class MountPoints(metaclass=SingletonMetaClass):
     def device_for(self, path: PathStr) -> Device:
         path = Path(path)
         stat = path.stat(follow_symlinks=True)
-        inode = stat.st_ino
-        device_id = stat.st_dev
-        major = os.major(device_id)
-        minor = os.minor(device_id)
-        print(f"{path} {device_id} {inode}")
+        # inode = stat.st_ino
+        _ = stat.st_dev
+        _ = Device.to_major_minor_int(os.major(_), os.minor(_))
+        return self._majmin_map[_]
