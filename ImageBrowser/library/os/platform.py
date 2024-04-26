@@ -10,19 +10,25 @@
 
 """
 
-# Look alternative Python package
+# Fixme: Look alternative Python package
+# Fixme: rework...
+# Fixme: move QtPlatform ???
+# Fixme: lazy import OpenGL -> Qt ???
 
 ####################################################################################################
 
-from enum import Enum, auto
+__ALL__ = ['Platform', 'QtPlatform']
+
+####################################################################################################
+
+from enum import IntEnum, auto
 import os
 import platform
 import sys
 
 ####################################################################################################
 
-class PlatformType(Enum):
-
+class PlatformType(IntEnum):
     Linux = auto()
     Windows = auto()
     OSX = auto()
@@ -36,7 +42,6 @@ class Platform:
     ##############################################
 
     def __init__(self):
-
         self.python_version = platform.python_version()
 
         self.os = self._get_os()
@@ -59,7 +64,6 @@ class Platform:
     ##############################################
 
     def _get_os(self):
-
         if os.name in ('nt',):
             return PlatformType.Windows
         elif sys.platform in ('linux',):
@@ -73,21 +77,18 @@ class Platform:
     ##############################################
 
     def _get_cpu(self):
-
         if self.os == PlatformType.Linux:
             with open('/proc/cpuinfo', 'rt') as cpuinfo:
                 for line in cpuinfo:
                     if 'model name' in line:
                         s = line.split(':')[1]
                         return s.strip().rstrip()
-
         elif self.os == PlatformType.Windows:
             raise NotImplementedError
 
     ##############################################
 
     def _get_number_of_cores(self):
-
         if self.os == PlatformType.Linux:
             number_of_cores = 0
             with open('/proc/cpuinfo', 'rt') as cpuinfo:
@@ -95,28 +96,24 @@ class Platform:
                     if 'processor' in line:
                         number_of_cores += 1
             return number_of_cores
-
         elif self.os == PlatformType.Windows:
             return int(os.getenv('NUMBER_OF_PROCESSORS'))
 
     ##############################################
 
     def _get_cpu_khz(self):
-
         if self.os == PlatformType.Linux:
             with open('/proc/cpuinfo', 'rt') as cpuinfo:
                 for line in cpuinfo:
                     if 'cpu MHz' in line:
                         s = line.split(':')[1]
                         return int(1000 * float(s))
-
         if self.os == PlatformType.Windows:
             raise NotImplementedError
 
     ##############################################
 
     def _get_memory_size_kb(self):
-
         if self.os == PlatformType.Linux:
             with open('/proc/meminfo', 'rt') as cpuinfo:
                 for line in cpuinfo:
@@ -130,7 +127,6 @@ class Platform:
     ##############################################
 
     def __str__(self):
-
         str_template = '''
 Platform {0.node}
   Hardware:
@@ -143,7 +139,6 @@ Platform {0.node}
 
   Python: {0.python_version}
 '''
-
         return str_template.format(self)
 
 ####################################################################################################
@@ -196,9 +191,8 @@ class QtPlatform(Platform):
     ##############################################
 
     def query_opengl(self):
-
+        # Fixme: require OpenGL
         import OpenGL.GL as GL
-
         self.gl_renderer = GL.glGetString(GL.GL_RENDERER)
         self.gl_version = GL.glGetString(GL.GL_VERSION)
         self.gl_vendor = GL.glGetString(GL.GL_VENDOR)
@@ -207,7 +201,6 @@ class QtPlatform(Platform):
     ##############################################
 
     def __str__(self):
-
 #         str_template = '''
 #    OpenGL
 #      Render: {0.gl_renderer}
@@ -241,6 +234,12 @@ class Screen:
 
     # def __init__(self, platform_obj, screen_id):
     def __init__(self, qt_screen):
+        self.name = qt_screen.name()
+        size = qt_screen.size()
+        self.screen_width, self.screen_height = size.width(), size.height()
+        self.dpi = qt_screen.physicalDotsPerInch()
+        self.dpi_x = qt_screen.physicalDotsPerInchX()
+        self.dpi_y = qt_screen.physicalDotsPerInchY()
 
         # self.screen_id = screen_id
 
@@ -250,23 +249,14 @@ class Screen:
         # widget = platform_obj.desktop.screen(screen_id)
         # self.dpi = widget.physicalDpiX(), widget.physicalDpiY()
 
-        ## qt_available_geometry = self.desktop.availableGeometry(screen_id)
-
-        self.name = qt_screen.name()
-        size = qt_screen.size()
-        self.screen_width, self.screen_height = size.width(), size.height()
-        self.dpi = qt_screen.physicalDotsPerInch()
-        self.dpi_x = qt_screen.physicalDotsPerInchX()
-        self.dpi_y = qt_screen.physicalDotsPerInchY()
+        # qt_available_geometry = self.desktop.availableGeometry(screen_id)
 
     ##############################################
 
     def __str__(self):
-
         str_template = """
   Screen {0.name}
     geometry   {0.screen_width}x{0.screen_height} px
     resolution {0.dpi:.2f} dpi
 """
-
         return str_template.format(self)

@@ -6,8 +6,8 @@
 #
 ####################################################################################################
 
-from ImageBrowser import setup_logging
-from ImageBrowser.common.os.linux import MountPoints
+from ImageBrowser.library.logging import setup_logging
+from ImageBrowser.library.os.linux import MountPoints
 
 setup_logging()
 

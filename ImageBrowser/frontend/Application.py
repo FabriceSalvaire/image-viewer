@@ -24,7 +24,10 @@ import os
 import sys
 import traceback
 
+_module_logger = logging.getLogger(__name__)
+
 # We use https://github.com/spyder-ide/qtpy Qt shim
+_module_logger.info("Load qtpy...")
 import qtpy
 from qtpy import QtCore
 from qtpy.QtCore import (
@@ -37,6 +40,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtQml import QQmlApplicationEngine
 from qtpy.QtWidgets import QApplication
 # from qtpy.QtQuickControls2 import QQuickStyle
+_module_logger.info("Load qtpy done")
 
 from ImageBrowser.library.os.platform import QtPlatform
 from .ApplicationMetadata import ApplicationMetadata
@@ -44,20 +48,23 @@ from .QmlApplication import QmlApplication
 from .ApplicationSettings import ApplicationSettings   # , Shortcut
 from .QmlImageCollection import QmlImageCollection
 
-# Load Resources
-#! from .rcc import resources
-from .rcc import ImageBrowserRessource
-
 # Register for QML
 from .KeySequenceEditor import KeySequenceEditor
 
 # if TYPE_CHECKING:
 from .ApplicationArgs import ApplicationArgs
 
+# Load Resources
+#! from .rcc import resources
+_module_logger.info("Load rcc")
+from .rcc import ImageBrowserRessource
+
+_module_logger.info("Import done")
+
 ####################################################################################################
 
-_module_logger = logging.getLogger(__name__)
-_module_logger.info(f"Qt binding is {qtpy.API_NAME} v{QtCore.__version__}")
+if qtpy:
+    _module_logger.info(f"Qt binding is {qtpy.API_NAME} v{QtCore.__version__}")
 
 type PathOrStr = Union[Path, str]
 
@@ -141,7 +148,7 @@ class Application(QObject):
         # self._engine.addImageProvider('image', self._image_provider)
 
         self._translator = None
-        # self._load_translation()
+        #! self._load_translation()
         self._set_context_properties()
         self._load_qml_main()
 
@@ -274,7 +281,7 @@ class Application(QObject):
         directory = str(Path(__file__).parent.joinpath('rcc', 'translations'))
         locale = QLocale()
         self._translator = QTranslator()
-        if self._translator.load(locale, 'pdf-browser', '.', directory, '.qm'):
+        if self._translator.load(locale, '...', '.', directory, '.qm'):
             self._application.installTranslator(self._translator)
         else:
             raise NameError(f'No translator for locale {locale.name()}')
@@ -311,16 +318,19 @@ class Application(QObject):
 
     ##############################################
 
-    def exec_(self) -> None:
+    def exec_(self) -> int:
         # if self._view is not None:
         #     self._view.show()
-        self._logger.info('Start event loop')
+        self._logger.info('Start Qt event loop')
         rc = self._application.exec()
+        self._logger.info(f"Qt event loop exited with {rc}")
         # Deleting the view before it goes out of scope is required
         # to make sure all child QML instances are destroyed in the correct order.
         # if self._view is not None:
         #     del self._view
-        sys.exit(rc)
+        # destroy QML now, else it will continue to log...
+        del self._engine
+        return rc
 
     ##############################################
 

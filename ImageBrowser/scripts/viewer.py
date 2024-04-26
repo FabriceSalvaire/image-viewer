@@ -11,8 +11,16 @@ __ALL__ = ['main']
 # Notice: ImageBrowser.__init__.py and .script are imported first
 
 def main() -> None:
-    # early logger
+    # to init startup time
     import logging
+
+    # start global timer
+    from ImageBrowser.library.timer import TimerManager
+    timer_manager = TimerManager.global_instance()
+    startup_timer = timer_manager.new('startup')
+    global_timer = timer_manager.new('global')
+
+    # early logger
     logging_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(
         format=logging_format,
@@ -54,7 +62,14 @@ def main() -> None:
     # import Qt...
     logging.info('Import Application...')
     from ImageBrowser.frontend.Application import Application
+    import sys
 
     # Application.setup_gui_application()
     application = Application.create(args)
-    application.exec_()
+    startup_timer.stop()
+    logger.info(f"Startup time {startup_timer.delta_ms:.3f} ms")
+    rc = application.exec_()
+    global_timer.stop()
+    logger.info(f"Global time {global_timer.delta_s:.3f} s")
+    logger.info(f"Bye exit with {rc}")
+    sys.exit(rc)
