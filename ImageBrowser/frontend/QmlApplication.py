@@ -30,6 +30,7 @@ from qtpy.QtQml import QmlElement, QmlUncreatable
 from .ApplicationMetadata import ApplicationMetadata
 from .QmlImageCollection import QmlImageCollection
 from .QmlFileSystemModel import QmlFileSystemModel
+from .PathNavigator import QmlPathNavigator
 
 if TYPE_CHECKING:
     from .Application import Application
@@ -68,6 +69,7 @@ class QmlApplication(QObject):
         super().__init__()
         self._application = application
         self._file_system_model = QmlFileSystemModel()
+        self._path_navigator = QmlPathNavigator(path=Path.cwd())
 
     ##############################################
 
@@ -96,8 +98,11 @@ class QmlApplication(QObject):
 
     @Property(QmlFileSystemModel, constant=True, final=True)
     def file_system_model(self) -> QmlFileSystemModel:
-        self._logger.info("")
         return self._file_system_model
+
+    @Property(QmlPathNavigator, constant=True, final=True)
+    def path_navigator(self) -> QmlPathNavigator:
+        return self._path_navigator
 
     ##############################################
 
