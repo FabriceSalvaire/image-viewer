@@ -10,11 +10,16 @@
   look at async...
 - test
 - spdx
+- improve thumbnail generator
+
+---
 
 # Bugs
 
 - shorcut null
 - [X] prev next hang
+
+---
 
 # References
 
@@ -148,3 +153,35 @@ A directory can have sub-collections (sub-directory).
 - [gPhoto](http://www.gphoto.org)
 - [Lensfun](https://lensfun.github.io)
 - [LibRaw](https://www.libraw.org)
+
+---
+
+# Library
+
+- an image is defined by its byte content
+- we can compute a hash for that
+  must be unique for a large collection
+- an image can be
+  overwritten
+  renamed in the directory (file name)
+  moved inside the device or outside
+- the path of an image can be altered
+- image inode is unchanged when
+  overwritten
+  renamed
+  moved inside
+- the device of an image can be
+  mounted elsewhere (mount point)
+  renamed (label)
+- device uuid should be a constant
+- thus we can track a image by the pair (device uuid, inode)
+  else we can use a hash -> (device uuid, inode) / hash
+  else we must add an uuid in the image metadata
+- path alias
+  - a path can contains a symbolic link
+  - a directory entry can be a hard link
+
+NTFS
+- inode is file ID
+- [Does Windows have Inode Numbers like Linux? - Stack Overflow](https://stackoverflow.com/questions/7162164/does-windows-have-inode-numbers-like-linux)
+- [Device Unique Identifiers (DUIDs) for Storage Devices - Windows drivers | Microsoft Learn](https://learn.microsoft.com/en-us/windows-hardware/drivers/storage/device-unique-identifiers--duids--for-storage-devices)
