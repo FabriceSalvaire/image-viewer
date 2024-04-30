@@ -12,6 +12,9 @@
 - spdx
 - improve thumbnail generator
 
+- path mimes image exif
+- multithreading
+
 ---
 
 # Bugs
@@ -185,3 +188,35 @@ NTFS
 - inode is file ID
 - [Does Windows have Inode Numbers like Linux? - Stack Overflow](https://stackoverflow.com/questions/7162164/does-windows-have-inode-numbers-like-linux)
 - [Device Unique Identifiers (DUIDs) for Storage Devices - Windows drivers | Microsoft Learn](https://learn.microsoft.com/en-us/windows-hardware/drivers/storage/device-unique-identifiers--duids--for-storage-devices)
+
+---
+
+# GIL / Multithreading
+
+- [Multiprocessing in Python and Jupyter Notebooks on Windows · Bob Swinkels](https://bobswinkels.com/posts/multiprocessing-python-windows-jupyter)
+
+- [Reusable Process Pool Executor — loky 3.4.1 documentation](https://loky.readthedocs.io/en/stable)
+  The aim of this project is to provide a robust, cross-platform and cross-version implementation of the ProcessPoolExecutor class of concurrent.futures. 
+- [Joblib: running Python functions as pipeline jobs — joblib 1.4.0 documentation](https://joblib.readthedocs.io/en/stable)
+  Joblib is a set of tools to provide lightweight pipelining in Python.
+  based on locky
+- [Dask | Scale the Python tools you love](https://www.dask.org)
+  Dask is a Python library for parallel and distributed computing.
+  -> clustering
+- [Using IPython for parallel computing — ipyparallel 8.9.0.dev documentation](https://ipyparallel.readthedocs.io/en/latest)
+
+- [Multiprocess & pyzmq — Learning 0MQ with examples](https://learning-0mq-with-pyzmq.readthedocs.io/en/latest/pyzmq/multiprocess/multiprocess.html)
+- [Building Distributed, Scalable Python Apps with pyzmq and multiprocessing | by Josh Liburdi | Medium](https://medium.com/@jshlbrd/building-distributed-scalable-python-apps-with-pyzmq-and-multiprocessing-ae832f75d1f0)
+- [Python Multiprocessing with ZeroMQ | Tao te Tek](https://taotetek.wordpress.com/2011/02/02/python-multiprocessing-with-zeromq/)
+
+- Pickle
+- Marshal
+- JSON
+- [GitHub - scottkmaxwell/pbjson: Packed Binary JSON extension for Python](https://github.com/scottkmaxwell/pbjson)
+- [simplejson — JSON encoder and decoder — simplejson 3.19.1 documentation](https://simplejson.readthedocs.io/en/latest/)
+- [bson – BSON (Binary JSON) Encoding and Decoding - PyMongo 4.7.0 documentation](https://pymongo.readthedocs.io/en/stable/api/bson/index.html)
+- [GitHub - py-bson/bson: Independent BSON codec for Python that doesn't depend on MongoDB.](https://github.com/py-bson/bson)
+
+---
+
+# Image Metadata
