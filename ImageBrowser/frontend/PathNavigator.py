@@ -13,10 +13,10 @@ __ALL__ = ['QmlPathNavigator']
 from pathlib import Path
 import logging
 
-from qtpy.QtCore import (
+from PySide6.QtCore import (
     Property, Signal, Slot, QObject,
 )
-from qtpy.QtQml import QmlElement, QmlUncreatable
+from PySide6.QtQml import QmlElement, QmlUncreatable
 
 ####################################################################################################
 

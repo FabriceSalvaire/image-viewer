@@ -19,10 +19,10 @@
 
 import logging
 
-from qtpy.QtCore import Property, Signal, Slot, QObject, Qt, QMetaEnum
-from qtpy.QtGui import QKeyEvent, QKeySequence
-from qtpy.QtQml import QmlElement
-from qtpy.QtQuick import QQuickItem
+from PySide6.QtCore import Property, Signal, Slot, QObject, Qt, QMetaEnum
+from PySide6.QtGui import QKeyEvent, QKeySequence
+from PySide6.QtQml import QmlElement
+from PySide6.QtQuick import QQuickItem
 
 ####################################################################################################
 

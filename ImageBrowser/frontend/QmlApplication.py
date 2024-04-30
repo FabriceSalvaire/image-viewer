@@ -21,11 +21,11 @@ from typing import Union, TYPE_CHECKING
 import logging
 import traceback
 
-from qtpy.QtCore import (
+from PySide6.QtCore import (
     Property, Signal, Slot, QObject,
     QUrl
 )
-from qtpy.QtQml import QmlElement, QmlUncreatable
+from PySide6.QtQml import QmlElement, QmlUncreatable
 
 from .ApplicationMetadata import ApplicationMetadata
 from .QmlImageCollection import QmlImageCollection

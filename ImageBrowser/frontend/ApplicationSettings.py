@@ -22,11 +22,11 @@ __all__ = [
 from typing import Iterator
 import logging
 
-from qtpy.QtCore import (
+from PySide6.QtCore import (
     Property, Signal, Slot, QObject,
     QSettings,
 )
-from qtpy.QtQml import QmlElement, QmlUncreatable, ListProperty
+from PySide6.QtQml import QmlElement, QmlUncreatable, ListProperty
 
 from . import DefaultSettings
 from .DefaultSettings import Shortcuts

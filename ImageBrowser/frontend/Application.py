@@ -26,26 +26,27 @@ import traceback
 
 _module_logger = logging.getLogger(__name__)
 
-# We use https://github.com/spyder-ide/qtpy Qt shim
-_module_logger.info("Load qtpy...")
-import qtpy
-from qtpy import QtCore
-from qtpy.QtCore import (
+# We use https://github.com/spyder-ide/PySide6 Qt shim
+# qtpy as a 100 ms overhead
+_module_logger.info("««« Import PySide6...")
+# import PySide6
+from PySide6 import QtCore
+from PySide6.QtCore import (
     qInstallMessageHandler, QtMsgType, QMessageLogContext,
     QTranslator,
     QObject,
     QTimer, QUrl, QThreadPool, QLocale,
 )
-from qtpy.QtGui import QIcon
-from qtpy.QtQml import QQmlApplicationEngine
-from qtpy.QtWidgets import QApplication
-# from qtpy.QtQuickControls2 import QQuickStyle
-_module_logger.info("Load qtpy done")
+from PySide6.QtGui import QIcon
+from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtWidgets import QApplication
+# from PySide6.QtQuickControls2 import QQuickStyle
+_module_logger.info("  PySide6 imported »»»")
 
-from ImageBrowser.library.os.platform import QtPlatform
+_module_logger.info("««« Import frontend modules...")
 from .ApplicationMetadata import ApplicationMetadata
-from .QmlApplication import QmlApplication
 from .ApplicationSettings import ApplicationSettings   # , Shortcut
+from .QmlApplication import QmlApplication
 from .QmlImageCollection import QmlImageCollection
 
 # Register for QML
@@ -53,18 +54,18 @@ from .KeySequenceEditor import KeySequenceEditor
 
 # if TYPE_CHECKING:
 from .ApplicationArgs import ApplicationArgs
+_module_logger.info("  Frontend modules imported »»»")
 
 # Load Resources
 #! from .rcc import resources
-_module_logger.info("Load rcc")
+_module_logger.info("««« Load rcc")
 from .rcc import ImageBrowserRessource
-
-_module_logger.info("Import done")
+_module_logger.info("  rcc imported »»»")
 
 ####################################################################################################
 
-if qtpy:
-    _module_logger.info(f"Qt binding is {qtpy.API_NAME} v{QtCore.__version__}")
+# _module_logger.info(f"Qt binding is {PySide6.API_NAME} v{QtCore.__version__}")
+_module_logger.info(f"Qt binding is PySide6 v{QtCore.__version__}")
 
 type PathOrStr = Union[Path, str]
 
@@ -295,7 +296,9 @@ class Application(QObject):
     ##############################################
 
     def _load_qml_main(self) -> None:
-        self._logger.info('Load QML...')
+        self._logger.info('')
+        # Register for QML
+        from .KeySequenceEditor import KeySequenceEditor
 
         qml_path = Path(__file__).parent.joinpath('qml')
         # qml_path = 'qrc:///qml'
@@ -305,9 +308,9 @@ class Application(QObject):
         self._qml_url = QUrl.fromLocalFile(str(main_qml_path))
         # QUrl('qrc:/qml/main.qml')
         self._engine.objectCreated.connect(self._check_qml_is_loaded)
+        self._logger.info('««« Load QML...')
         self._engine.load(self._qml_url)
-
-        self._logger.info('QML loaded')
+        self._logger.info('  QML loaded »»»')
 
     ##############################################
 
@@ -335,7 +338,7 @@ class Application(QObject):
     ##############################################
 
     def _post_init(self) -> None:
-        self._logger.info('Post Init...')
+        self._logger.info('««« Post Init...')
         # if self._args.watcher:
         #     self._logger.info('Start watcher')
         #     self._collection.start_watcher()   # QtCore.QFileSystemWatcher(self)
@@ -345,7 +348,7 @@ class Application(QObject):
             self._qml_application.load_collection(url)
         if self._args.user_script is not None:
             self.execute_user_script(self._args.user_script)
-        self._logger.info('Post Init Done')
+        self._logger.info('  Post Init Done »»»')
 
     ##############################################
 

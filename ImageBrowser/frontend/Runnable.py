@@ -20,9 +20,9 @@ import traceback
 
 ####################################################################################################
 
-from qtpy.QtCore import QRunnable
-# from qtpy.QtQml import QQmlListProperty
-from qtpy.QtCore import (
+from PySide6.QtCore import QRunnable
+# from PySide6.QtQml import QQmlListProperty
+from PySide6.QtCore import (
     Property, Signal, Slot, QObject,
     Qt, QTimer, QUrl
 )

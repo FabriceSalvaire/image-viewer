@@ -14,7 +14,7 @@ __all__ = ['QmlFileSystemModel']
 # import glob
 import logging
 
-from qtpy.QtCore import (
+from PySide6.QtCore import (
     Qt,
     QAbstractListModel,
     QFileSystemWatcher,
@@ -23,8 +23,8 @@ from qtpy.QtCore import (
     QDir, QAbstractListModel, QFile, QTextStream,
     QMimeDatabase, QFileInfo, QStandardPaths, QModelIndex,
 )
-from qtpy.QtQml import QmlElement, QmlSingleton, QmlUncreatable
-from qtpy.QtWidgets import QFileSystemModel
+from PySide6.QtQml import QmlElement, QmlSingleton, QmlUncreatable
+from PySide6.QtWidgets import QFileSystemModel
 
 ####################################################################################################
 

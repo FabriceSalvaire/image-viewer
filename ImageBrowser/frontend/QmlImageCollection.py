@@ -16,14 +16,14 @@ import logging
 import subprocess
 import time
 
-from qtpy.QtCore import (
+from PySide6.QtCore import (
     Qt,
     QAbstractListModel,
     QFileSystemWatcher,
     Property, Signal, Slot, QObject,
     QByteArray,
 )
-from qtpy.QtQml import QmlElement, QmlUncreatable, ListProperty
+from PySide6.QtQml import QmlElement, QmlUncreatable, ListProperty
 
 # Fixme: Linux only
 from ImageBrowser.backend.thumbnail.FreeDesktop import ThumbnailCache, ThumbnailSize
