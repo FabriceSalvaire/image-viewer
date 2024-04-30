@@ -29,7 +29,6 @@ class FileWatcher(metaclass=SingletonMetaClass):
     ##############################################
 
     def __init__(self):
-
         self._rename_queue = []
         self._delete_queue = []
 
@@ -52,7 +51,6 @@ class FileWatcher(metaclass=SingletonMetaClass):
     ##############################################
 
     def delete_file(self, path, dry_run=False):
-
         _module_logger.info('Delete\n  {}'.format(path))
         if not dry_run:
             os.unlink(path)
@@ -61,10 +59,8 @@ class FileWatcher(metaclass=SingletonMetaClass):
     ##############################################
 
     def rename_file(self, old_path, new_path, dry_run=False):
-
         old_path = str(old_path)
         new_path = str(new_path)
-
         _module_logger.info('Rename\n  {}\n->\n{}'.format(old_path, new_path))
         if Path(new_path).exists():
             _module_logger.warning('Cannot rename file: file exists\n{}'.format(new_path))
