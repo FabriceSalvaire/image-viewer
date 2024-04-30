@@ -21,6 +21,7 @@ from pathlib import Path
 # from typing import TYPE_CHECKING
 import logging
 import os
+import signal
 import sys
 import traceback
 
@@ -48,9 +49,7 @@ from .ApplicationMetadata import ApplicationMetadata
 from .ApplicationSettings import ApplicationSettings   # , Shortcut
 from .QmlApplication import QmlApplication
 from .QmlImageCollection import QmlImageCollection
-
-# Register for QML
-from .KeySequenceEditor import KeySequenceEditor
+#! from ImageBrowser.library.os.platform import QtPlatform
 
 # if TYPE_CHECKING:
 from .ApplicationArgs import ApplicationArgs
@@ -119,6 +118,9 @@ class Application(QObject):
         # Fixme: must be defined before QML
         #! self.load_collection(self._args.path)
 
+        # Interrupt from keyboard (CTRL + C)
+        signal.signal(signal.SIGINT, self._signal_handler)
+
         # WARNING: This can solve a crash issue at startup
         if not self._args.no_qt_message_handler:
             qInstallMessageHandler(self._message_handler)
@@ -138,7 +140,8 @@ class Application(QObject):
         self._qml_application = QmlApplication(self)
         #! self._application.qml_main = self._qml_application
 
-        self._platform = QtPlatform()
+        # Fixme: check overhead
+        #! self._platform = QtPlatform()
         # self._logger.info('\n' + str(self._platform))
 
         self._thread_pool = QThreadPool()
@@ -171,9 +174,9 @@ class Application(QObject):
     # def args(self):
     #     return self._args
 
-    @property
-    def platform(self) -> QtPlatform:
-        return self._platform
+    # @property
+    # def platform(self) -> QtPlatform:
+    #     return self._platform
 
     @property
     def settings(self) -> ApplicationSettings:
@@ -202,6 +205,13 @@ class Application(QObject):
         # print('-'*80)
         # print(message)
         self._logger.critical(message)
+
+    ##############################################
+
+    def _signal_handler(self, sig, frame):
+        # Fixme: called when QML window is closed
+        #   Qt handler ???
+        self._logger.info(f"Catched signal {sig}")
 
     ##############################################
 
