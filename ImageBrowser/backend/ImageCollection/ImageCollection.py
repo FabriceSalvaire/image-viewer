@@ -15,7 +15,7 @@ from typing import Iterator, Union, Callable
 import logging
 import os
 
-from .Image import Image
+from .Image import Image as ImageAbc
 
 type PathOrStr = Union[Path, str]
 
@@ -24,6 +24,43 @@ type PathOrStr = Union[Path, str]
 _module_logger = logging.getLogger(__name__)
 
 LINESEP = os.linesep
+
+####################################################################################################
+
+class Image(ImageAbc):
+
+    _logger = _module_logger.getChild('Image')
+
+    ##############################################
+
+    def __init__(self, collection: 'ImageCollection', path: Path, index: int) -> None:
+        super().__init__(path)
+        self._collection = collection
+        self._index = index
+
+    ##############################################
+
+    @property
+    def collection(self) -> 'ImageCollection':
+        return self._collection
+
+    @property
+    def index(self) -> int:
+        return self._index
+
+    ##############################################
+
+    def __repr__(self) -> str:
+        return f"{self._path} {self._index}"
+
+    def __int__(self) -> int:
+        return self._index
+
+    ##############################################
+
+    def __lt__(self, other: 'Image') -> bool:
+        """Sort by index"""
+        return int(self) < int(other)
 
 ####################################################################################################
 
