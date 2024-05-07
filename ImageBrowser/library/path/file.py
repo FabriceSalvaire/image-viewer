@@ -34,7 +34,7 @@ DANGEROUS = True
 ####################################################################################################
 
 from pathlib import Path
-from typing import AnyStr, Optional, Type
+from typing import AnyStr, Optional, Type, Union
 import hashlib
 import logging
 import os
@@ -48,6 +48,8 @@ _module_logger = logging.getLogger(__name__)
 
 LINESEP = os.linesep
 
+type PathStr = Union[Path, str]
+
 ####################################################################################################
 
 class File:
@@ -55,8 +57,7 @@ class File:
     ST_NBLOCKSIZE = 512
 
     __slots__ = [
-        '_parent',
-        '_name',
+        '_path',
         '_stat',
         '_allocated_size',
         '_sha',
@@ -72,58 +73,8 @@ class File:
 
     ##############################################
 
-    @classmethod
-    def decode(cls, _: bytes) -> str:
-        """decode path"""
-        try:
-            _ = _.decode('utf8')
-        except UnicodeDecodeError:
-            cls._logger.error(f"unicode error {_}")
-            _ = _.decode('latin1')
-        return _
-
-    ##############################################
-
-    @staticmethod
-    def encode(_: str) -> bytes:
-        return str(_).encode('utf-8')
-
-    ##############################################
-
-    @classmethod
-    def from_str(cls, path: str | bytes) -> 'File':
-        if isinstance(path, bytes):
-            return cls.from_bytes(path)
-        return cls.from_path(Path(path))
-
-    ##############################################
-
-    @classmethod
-    def from_bytes(cls, path: bytes) -> 'File':
-        _ = path.rfind(b'/')
-        if _ != -1:
-            parent = path[:_]
-            name = path[_+1:]
-        else:
-            parent = b''
-            name = bytes(path)
-        return cls(parent, name)
-
-    ##############################################
-
-    @classmethod
-    def from_path(cls, path: Path) -> 'File':
-        return cls(cls.encode(path.parent), cls.encode(path.name))
-
-    ##############################################
-
-    def __init__(self, parent: bytes, name: bytes) -> None:
-        # Fixme: design
-        #  why bytes and not str or Path ???
-        if not name:
-            raise ValueError("name must be provided")
-        self._parent = parent
-        self._name = name
+    def __init__(self, path: PathStr) -> None:
+        self._path = path
         self.vacuum()
 
     ##############################################
@@ -136,84 +87,57 @@ class File:
 
     ##############################################
 
-    @property
-    def parent(self) -> bytes:
-        return self._parent
-
-    @property
-    def name(self) -> bytes:
-        return self._name
-
-    @property
-    def stem(self) -> bytes:
-        # return self.path.stem
-        name = self._name
-        _ = name.find(b'.')
-        if _ != -1:
-            return name[:_]
-        else:
-            return name
-
-    @property
-    def suffix(self) -> bytes:
-        # return self.path.suffix
-        # Fixme: duplicated
-        name = self._name
-        _ = name.find(b'.')
-        if _ != -1:
-            return name[_:]
-        else:
-            return b''
-
-    @property
-    def path_bytes(self) -> bytes:
-        return os.path.join(self._parent, self._name)
-
-    @property
-    def path_str(self) -> str:
-        return self.decode(self.path_bytes)
+    # pathlib API
 
     @property
     def path(self) -> Path:
-        # Fixme: cache ?
-        return Path(self.path_str)
-
-    ##############################################
+        return self._path
 
     def __str__(self) -> str:
-        return f"{self.path_bytes}"
-
-    ##############################################
+        return str(self._path)
 
     @property
-    def is_file(self) -> bool:
-        return os.path.isfile(self.path_bytes)
+    def parent(self) -> str:
+        return self._path.parent
+
+    @property
+    def name(self) -> str:
+        return self._path.name
+
+    @property
+    def stem(self) -> str:
+        return self._path.stem
+
+    @property
+    def suffix(self) -> str:
+        return self._path.suffix
 
     @property
     def exists(self) -> bool:
-        return os.path.exists(self.path_bytes)
+        return self._path.exists()
+
+    @property
+    def is_file(self) -> bool:
+        return self._path.is_file()
 
     @property
     def is_symlink(self) -> bool:
-        return os.path.islink(self.path_bytes)
+        return self._path.is_symlink()
 
     ##############################################
+
+    # Stat API
 
     @property
     def stat(self) -> os.stat_result:
         # if not hasattr(self, '_stat'):
         if self._stat is None:
-            # does not follow symbolic links
-            self._stat = os.lstat(self.path_bytes)
+            self._stat = self._path.stat(follow_symlinks=False)
         return self._stat
-
-    ##############################################
 
     @property
     def is_empty(self) -> bool:
         return self.stat.st_size == 0
-
-    ##############################################
 
     @property
     def size(self) -> int:
@@ -239,7 +163,6 @@ class File:
     def gid(self) -> int:
         return self.stat.st_gid
 
-    ##############################################
 
     @property
     def allocated_size(self) -> int:
@@ -254,11 +177,11 @@ class File:
 
     ##############################################
 
-    def _read_content(self, size: Optional[int] = None) -> bytes:
+    def read(self, size: Optional[int] = None) -> bytes:
         # unlikely to happen
         # if self.is_empty:
         #     return b''
-        with open(self.path_bytes, 'rb') as fh:
+        with open(self._path, 'rb') as fh:
             if size is not None and size < 0:
                 if abs(size) < self.size:
                     fh.seek(size, os.SEEK_END)
@@ -276,7 +199,7 @@ class File:
             if self.is_empty:
                 self._sha = ''
             else:
-                data = self._read_content()
+                data = self.read()
                 self._sha = self.SHA_METHOD(data).hexdigest()
         return self._sha
 
@@ -287,7 +210,7 @@ class File:
             return ''
         if size is None:
             size = self.PARTIAL_SHA_BYTES
-        data = self._read_content(size)
+        data = self.read(size)
         return self.SHA_METHOD(data).hexdigest()
 
     ##############################################
@@ -295,14 +218,12 @@ class File:
     def first_bytes(self, size: Optional[int] = None) -> str:
         if size is None:
             size = self.SOME_BYTES_SIZE
-        return self._read_content(size)
-
-    ##############################################
+        return self.read(size)
 
     def last_bytes(self, size: Optional[int] = None) -> str:
         if size is None:
             size = self.SOME_BYTES_SIZE
-        return self._read_content(-size)
+        return self.read(-size)
 
     ##############################################
 
@@ -311,15 +232,13 @@ class File:
             return self._compare_with_posix(other)
         return self._compare_with_py(other)
 
-    ##############################################
 
     def _compare_with_posix(self, other: 'File') -> bool:
         # Fixme: portability
-        command = ('/usr/bin/cmp', '--silent', self.path_bytes, other.path_bytes)
+        command = ('/usr/bin/cmp', '--silent', str(self), str(other))
         # Fixme: check ?
         return subprocess.run(command).returncode == 0
 
-    ##############################################
 
     def _compare_with_py(self, other: 'File') -> bool:
         size = self.size
@@ -370,30 +289,30 @@ class File:
     ##############################################
 
     def delete(self) -> None:
-        self._logger.info(f"delete{LINESEP}{self.path}")
+        self._logger.info(f"delete{LINESEP}{self}")
         # Danger !
         # if DANGEROUS:
-        #!!! self.path.unlink()
+        #!!! self._path.unlink()
 
     ##############################################
 
-    def rename(self, dst: Path | str,
+    def rename(self, dst: PathStr,
                pattern: str = "{stem} ({i}){suffix}",
                rebuild: bool = False
                ) -> Type['File'] | None:
         if isinstance(dst, str):
             dst = Path(dst)
         if dst == self.path:
-            self._logger.warning(f"same destination{self.path}")
+            self._logger.warning(f"same destination{self}")
             return None
         if dst.exists():
             new_dst = self._find_rename_alternative(dst, pattern)
-            self._logger.warning(f"{dst} exists, rename {self.path} to {new_dst}")
+            self._logger.warning(f"{dst} exists, rename {self} to {new_dst}")
             dst = new_dst
         # recheck
         if dst.exists():
             raise NameError(f"Internal Error: {dst} exists")
-        self._logger.info(f"rename{LINESEP}{self.path_str}{LINESEP}  ->{LINESEP}{dst}")
+        self._logger.info(f"rename{LINESEP}{self}{LINESEP}  ->{LINESEP}{dst}")
         # Danger !
         if DANGEROUS:
             self.path.rename(dst)
@@ -404,24 +323,27 @@ class File:
 
     ##############################################
 
-    def move_to(self, dst: Path | str) -> None:
-        dst_path = Path(dst) / self.path.name
-        self._logger.info(f"move{LINESEP}{self.path_str}{LINESEP}  ->{LINESEP}{dst_path}")
+    def move_to(self, dst: PathStr) -> None:
+        dst_path = Path(dst) / self.name
+        self._logger.info(f"move{LINESEP}{self}{LINESEP}  ->{LINESEP}{dst_path}")
         self.rename(dst_path)
 
     ##############################################
 
     def write(self, data: bytes) -> None:
-        with open(self.path_bytes, 'wb') as fh:
+        with open(self._path, 'wb') as fh:
             fh.write(data)
 
     ##############################################
+
+    # Fixme: portability
+    #   Linux only
 
     USER_BALOO_RATING = 'user.baloo.rating'
 
     @property
     def rating(self) -> int:
-        path = self.path_bytes
+        path = str(self)
         if self.USER_BALOO_RATING in xattr.listxattr(path):
             _ = xattr.getxattr(path, self.USER_BALOO_RATING)
             return int(_)
@@ -430,6 +352,6 @@ class File:
 
     @rating.setter
     def rating(self, rating: int) -> None:
-        path = self.path_bytes
+        path = str(self)
         _ = str(rating).encode('ascii')
         xattr.setxattr(path, self.USER_BALOO_RATING, _)

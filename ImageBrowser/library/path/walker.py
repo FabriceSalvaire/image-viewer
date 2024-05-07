@@ -6,10 +6,11 @@
 #
 ####################################################################################################
 
-# from os import PathLike
 from pathlib import Path
-from typing import AnyStr, List, Union
+from typing import List, Union
 import os
+
+type PathStr = Union[Path, str]
 
 ####################################################################################################
 
@@ -19,8 +20,7 @@ class WalkerAbc:
 
     ##############################################
 
-    # def __init__(self, path : Union[AnyStr, PathLike[AnyStr]]) -> None:
-    def __init__(self, path: Union[AnyStr, Path]) -> None:
+    def __init__(self, path: PathStr) -> None:
         # Make the path absolute, resolving any symlinks.
         self._path = Path(path).expanduser().resolve()
         if not self._path.exists():
@@ -43,10 +43,7 @@ class WalkerAbc:
         if max_depth >= 0:
             top_down = True
             depth = 0
-        # to avoid UnicodeEncodeError: surrogates not allowed
-        top = str(self._path).encode('utf-8')
-        for dirpath, dirnames, filenames in os.walk(top, topdown=top_down, followlinks=follow_links):
-            # dirnames and filenames are List[bytes]
+        for dirpath, dirnames, filenames in self._path.walk(topdown=top_down, followlinks=follow_links):
             if top_down and sort:
                 self.sort_dirnames(dirnames)
             if hasattr(self, 'on_directory'):
@@ -62,16 +59,15 @@ class WalkerAbc:
 
     ##############################################
 
-    def sort_dirnames(self, dirnames: List[bytes]) -> None:
-        # Fixme: sort utf-8 bytes ???
+    def sort_dirnames(self, dirnames: List[str]) -> None:
         dirnames.sort()
 
     ##############################################
 
-    # def on_directory(self, dirpath: bytes, dirname: bytes) -> None:
+    # def on_directory(self, dirpath: str, dirname: str) -> None:
     #     raise NotImplementedError
 
     ##############################################
 
-    # def on_filename(self, dirpath: bytes, filename: bytes) -> None:
+    # def on_filename(self, dirpath: str, filename: str) -> None:
     #     raise NotImplementedError
