@@ -73,8 +73,16 @@ class File:
 
     ##############################################
 
-    def __init__(self, path: PathStr) -> None:
-        self._path = path
+    def __init__(self, *path: list[PathStr], resolve: bool = True, strict: bool = False) -> None:
+        # Fixme: typing
+        _ = Path(*path)
+        if resolve:
+            # Return a new path with expanded ~ and ~user constructs
+            _ = _.expanduser()
+            # Make the path absolute, resolving any symlinks.
+            # If the path doesn’t exist and strict is True, FileNotFoundError is raised.
+            _ = _.resolve(strict)
+        self._path = _
         self.vacuum()
 
     ##############################################
@@ -215,12 +223,12 @@ class File:
 
     ##############################################
 
-    def first_bytes(self, size: Optional[int] = None) -> str:
+    def first_bytes(self, size: Optional[int] = None) -> bytes:
         if size is None:
             size = self.SOME_BYTES_SIZE
         return self.read(size)
 
-    def last_bytes(self, size: Optional[int] = None) -> str:
+    def last_bytes(self, size: Optional[int] = None) -> bytes:
         if size is None:
             size = self.SOME_BYTES_SIZE
         return self.read(-size)
