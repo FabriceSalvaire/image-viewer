@@ -22,12 +22,12 @@ PPP_HEARTBEAT = b"\x02"  # Signals worker heartbeat
 
 ####################################################################################################
 
-class Worker(object):
+class Worker:
     def __init__(self, address):
         self.address = address
         self.expiry = time.time() + HEARTBEAT_INTERVAL * HEARTBEAT_LIVENESS
 
-class WorkerQueue(object):
+class WorkerQueue:
     def __init__(self):
         self.queue = OrderedDict()
 
@@ -52,10 +52,10 @@ class WorkerQueue(object):
 
 ####################################################################################################
 
-context = zmq.Context(1)
+context = zmq.Context()
 
-frontend = context.socket(zmq.ROUTER)   # ROUTER
-backend = context.socket(zmq.ROUTER)    # ROUTER
+frontend = context.socket(zmq.ROUTER)
+backend = context.socket(zmq.ROUTER)
 frontend.bind("tcp://*:5555")   # For clients
 backend.bind("tcp://*:5556")    # For workers
 
@@ -75,10 +75,10 @@ while True:
         poller = poll_both
     else:
         poller = poll_workers
-    socks = dict(poller.poll(HEARTBEAT_INTERVAL * 1000))
+    sockets = dict(poller.poll(HEARTBEAT_INTERVAL * 1000))
 
     # Handle worker activity on backend
-    if socks.get(backend) == zmq.POLLIN:
+    if sockets.get(backend) == zmq.POLLIN:
         # Use worker address for LRU routing
         frames = backend.recv_multipart()
         if not frames:
@@ -91,7 +91,7 @@ while True:
         msg = frames[1:]
         if len(msg) == 1:
             if msg[0] not in (PPP_READY, PPP_HEARTBEAT):
-                print("E: Invalid message from worker: %s" % msg)
+                print(f"Error: Invalid message from worker: {msg}")
         else:
             frontend.send_multipart(msg)
 
@@ -101,7 +101,7 @@ while True:
                 msg = [worker, PPP_HEARTBEAT]
                 backend.send_multipart(msg)
             heartbeat_at = time.time() + HEARTBEAT_INTERVAL
-    if socks.get(frontend) == zmq.POLLIN:
+    if sockets.get(frontend) == zmq.POLLIN:
         frames = frontend.recv_multipart()
         if not frames:
             break

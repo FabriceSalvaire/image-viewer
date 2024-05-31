@@ -9,13 +9,9 @@
 ####################################################################################################
 
 import itertools
-import logging
-import sys
 import zmq
 
 ####################################################################################################
-
-logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
 REQUEST_TIMEOUT = 2500
 REQUEST_RETRIES = 3
@@ -30,29 +26,30 @@ def connect(context):
 def client() -> None:
     context = zmq.Context()
 
-    logging.info("Connecting to server...")
+    print("Connecting to server...")
     client = connect(context)
 
     # Sequential: send and poll for response
     for sequence in itertools.count():
         request = str(sequence).encode()
-        logging.info("Sending (%s)", request)
+        print(f"Sending ({request})")
         client.send(request)
 
         retries_left = REQUEST_RETRIES
         while True:
-            if (client.poll(REQUEST_TIMEOUT) & zmq.POLLIN) != 0:
+            print("Poll server")
+            if client.poll(REQUEST_TIMEOUT) & zmq.POLLIN:
                 reply = client.recv()
                 if int(reply) == sequence:
-                    logging.info("Server replied OK (%s)", reply)
-                    retries_left = REQUEST_RETRIES
+                    print(f"Server replied OK {reply}")
                     break
                 else:
-                    logging.error("Malformed reply from server: %s", reply)
+                    print("Error: Malformed reply from server: {reply}")
+                    # ok ???
                     continue
 
+            print("Warning: No response from server")
             retries_left -= 1
-            logging.warning("No response from server")
 
             # Socket is confused. Close and remove it.
             #   Set linger period for socket shutdown: discard all pending messages
@@ -60,14 +57,14 @@ def client() -> None:
             client.close()
 
             if retries_left == 0:
-                logging.error("Server seems to be offline, abandoning")
-                sys.exit()
+                print("Error: Server seems to be offline, abandoning")
+                # sys.exit()
+                return
 
-            logging.info("Reconnecting to server...")
+            print("Reconnecting to server...")
             # Create new connection
             client = connect(context)
-
-            logging.info("Resending (%s)", request)
+            print(f"Resending {request}")
             client.send(request)
 
 
