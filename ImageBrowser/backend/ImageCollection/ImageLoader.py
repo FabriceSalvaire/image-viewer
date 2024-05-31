@@ -70,3 +70,9 @@ class ImageLoader:
 
     # remote image require a network manager
     # to handle protocol, auth, header ...
+    # cache ???
+
+    def remote_loader(self, url: str) -> np.ndarray:
+        _= str(url)
+        from .http import RequestManager
+        return RequestManager.get(url)
