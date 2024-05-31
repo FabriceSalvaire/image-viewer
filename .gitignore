@@ -36,3 +36,21 @@ ImageBrowser/frontend/rcc/translations/
 
 doc/
 open-doc.sh
+
+resources
+review.json
+tasks/nogit/
+
+image-examples/
+
+ImageBrowser/backend/__UNUSED__/
+__TMP__/
+
+dev-tests/parallel/zmq/hatchd/.hg/
+dev-tests/parallel/zmq/hatchd/.hgignore
+dev-tests/parallel/zmq/hatchd/bootstrap.py
+dev-tests/parallel/zmq/hatchd/buildout.cfg
+dev-tests/parallel/zmq/hatchd/filesync.py
+dev-tests/parallel/zmq/hatchd/setup.py
+dev-tests/parallel/zmq/hatchd/wdd/__init__.py
+dev-tests/parallel/zmq/hatchd/wdd/hwm_test.py
