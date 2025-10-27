@@ -15,7 +15,7 @@ from typing import Iterator, Union, Callable
 import logging
 import os
 
-from .Image import Image as ImageAbc
+from .Image import FileImage
 
 type PathOrStr = Union[Path, str]
 
@@ -27,7 +27,7 @@ LINESEP = os.linesep
 
 ####################################################################################################
 
-class Image(ImageAbc):
+class Image(FileImage):
 
     _logger = _module_logger.getChild('Image')
 

@@ -181,8 +181,8 @@ ApplicationWindow {
         function set_test_page() { currentIndex = 2 }
 
         Component.onCompleted: {
-            // set_thumbnail_page()
-            set_test_page()
+            set_thumbnail_page()
+            // set_test_page()
         }
 
         // Fixme: simplify with Page { Widget{} } ???

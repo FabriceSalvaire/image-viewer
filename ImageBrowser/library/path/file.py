@@ -101,6 +101,10 @@ class File:
     def path(self) -> Path:
         return self._path
 
+    @property
+    def path_str(self) -> Path:
+        return str(self._path)
+
     def __str__(self) -> str:
         return str(self._path)
 

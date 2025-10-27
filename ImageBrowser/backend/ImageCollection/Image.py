@@ -15,7 +15,7 @@ import logging
 
 import numpy as np
 
-from ImageBrowser.path.file import File
+from ImageBrowser.library.path.file import File
 from .ImageLoader import ImageLoader
 
 ####################################################################################################
@@ -61,7 +61,6 @@ class ImageAbc:
         else:
             return None
 
-
 ####################################################################################################
 
 class NpImage(ImageAbc):
@@ -91,7 +90,7 @@ class FileImage(ImageAbc, File):
     def __init__(self, path: Path) -> None:
         File.__init__(self, path)
         ImageAbc.__init__(self)
-        self._logger.info(repr(self))
+        #! self._logger.info(repr(self))   # _index is not yet defined
 
     ##############################################
 

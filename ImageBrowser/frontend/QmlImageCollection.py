@@ -27,7 +27,7 @@ from PySide6.QtQml import QmlElement, QmlUncreatable, ListProperty
 
 # Fixme: Linux only
 from ImageBrowser.backend.thumbnail.FreeDesktop import ThumbnailCache, ThumbnailSize
-from ImageBrowser.backend.ImageCollection import DirectoryCollection, Image
+from ImageBrowser.backend.ImageCollection.ImageCollection import DirectoryCollection, Image
 from .Runnable import Worker
 
 ####################################################################################################
@@ -115,7 +115,7 @@ class QmlImage(QObject):
             return str(thumbnail_cache[self._image.path].large)
         worker = Worker(job)
         worker.signals.finished.connect(self.thumbnail_ready)
-        from .QmlApplication import Application
+        from .Application import Application
         Application.instance.thread_pool.start(worker)
 
     ##############################################
@@ -188,7 +188,7 @@ class QmlImageCollection(QAbstractListModel):
     #     return QQmlListProperty(QmlImage, self, self._images)
 
     def rowCount(self, parent=None) -> int:
-        _= len(self._images)
+        _ = len(self._images)
         self._logger.info(f"= {_}")
         return _
 
