@@ -278,6 +278,15 @@ class WorkerPool:
                 _ = SLEEP_INF / 1000
                 print(f"Sleep {_}s    delta = {delta_counter} sent = {self._sender_counter} ...")
                 await asyncio.sleep(_)
+            # Fixme: a better strategy is to continuously fill the queue of each worker to a maximum.
+            #   so we must track the length of each queue
+            #   and wait for a job done event when all the queue are full
+            #     empty_queue = asyncio.Event()
+            #     receiver do for each msg
+            #       empty_queue.set()
+            #     sender do when queue is full
+            #       empty_queue.clear()
+            #       await empty_queue.wait()
         self._sender_done = True
 
     ##############################################
