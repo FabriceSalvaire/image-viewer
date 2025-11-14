@@ -66,6 +66,8 @@ ApplicationWindow {
     Component.onCompleted: {
         console.info('ApplicationWindow.onCompleted')
         console.info(application.collection)
+        // Fixme: Could not find receiver of the connection, using sender as receiver.
+        //  Disconnect explicitly (or delete the sender) to make sure the connection is removed.
         application.show_message.connect(on_message)
         application.show_error.connect(on_error)
         application_window.showMaximized()
@@ -85,11 +87,11 @@ ApplicationWindow {
         }
     }
 
-    function on_message(message) {
+    function on_message(message: string) {
         error_message_dialog.open_with_message(message)
     }
 
-    function on_error(message, backtrace) {
+    function on_error(message: string, backtrace: string) {
         var text = message + '\n' + backtrace
         error_message_dialog.open_with_message(text)
     }
@@ -181,8 +183,8 @@ ApplicationWindow {
         function set_test_page() { currentIndex = 2 }
 
         Component.onCompleted: {
-            set_thumbnail_page()
-            // set_test_page()
+            // set_thumbnail_page()
+            set_test_page()
         }
 
         // Fixme: simplify with Page { Widget{} } ???
