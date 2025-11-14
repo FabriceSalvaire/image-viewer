@@ -73,6 +73,6 @@ class ImageLoader:
     # cache ???
 
     def remote_loader(self, url: str) -> np.ndarray:
-        _= str(url)
+        _ = str(url)
         from .http import RequestManager
         return RequestManager.get(url)

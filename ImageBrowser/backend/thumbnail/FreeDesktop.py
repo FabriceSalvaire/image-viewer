@@ -260,6 +260,7 @@ class Thumbnail:
     ##############################################
 
     def _make_png_info(self) -> PngImagePlugin.PngInfo:
+        # use ImageMagick command `identify -verbose file` to get PNG Properties
         # {
         #     'Thumb::URI': 'file:///home/fabrice/....png'
         #     'Thumb::MTime': '1547660783',

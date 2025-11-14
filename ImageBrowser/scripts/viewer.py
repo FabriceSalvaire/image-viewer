@@ -55,6 +55,7 @@ def main() -> None:
     os.environ['QT_LOGGING_RULES'] = _
 
     # setup qtpy
+    #   some code imports directly PySide6 !
     logging.info('Use PySide6')
     # os.environ['PYSIDE67_OPTION_PYTHON_ENUM'] = '1'
     os.environ['QT_API'] = 'pyside6'

@@ -69,6 +69,8 @@ class QmlPathNavigator(QObject):
 
     ##############################################
 
+    # Fixme: ok Property notify ???
+
     path_str_changed = Signal()
 
     @Property(str, notify=path_str_changed)
