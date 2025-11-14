@@ -155,7 +155,7 @@ class DirectoryCollection(ImageCollection):
 
     def __init__(self, path: PathOrStr) -> None:
         super().__init__()
-        self._path = Path(str(path)).resolve()
+        self._path = Path(str(path)).expanduser().resolve()
         self._get_images()
 
     ##############################################
@@ -170,18 +170,22 @@ class DirectoryCollection(ImageCollection):
     ##############################################
 
     @property
-    def _list_dir(self) -> Iterator[str]:
+    def _iter_dir(self) -> Iterator[str]:
         return self._path.iterdir()
 
-    def _get_images(self) -> None:
-        # self._images = []
-        for name in self._list_dir:
+    @property
+    def _iter_files(self) -> Iterator[str]:
+        for name in self._iter_dir:
             path = self.joinpath(name)
-            if path.is_dir():
-                pass
-            elif path.is_file() and path.suffix in self.EXTENSIONS:
-                try:
-                    self.add_image(path)
-                except Exception as e:
-                    self._logger.warning(f"Error on {path}{LINESEP}{e}")
+            if path.is_file() and path.suffix in self.EXTENSIONS:
+                yield path
+            # elif path.is_dir():
+            #     pass
+
+    def _get_images(self) -> None:
+        for path in self._iter_files:
+            try:
+                self.add_image(path)
+            except Exception as e:
+                self._logger.warning(f"Error on {path}{LINESEP}{e}")
         self._images.sort()   # by index
