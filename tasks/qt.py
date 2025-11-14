@@ -16,7 +16,7 @@ from invoke import task
 ####################################################################################################
 
 SOURCE_PATH = Path(__file__).absolute().parents[1]
-FRONTEND_PATH = SOURCE_PATH.joinpath('DatasheetExtractor', 'frontend')
+FRONTEND_PATH = SOURCE_PATH.joinpath('ImageBrowser', 'frontend')
 QML_PATH = FRONTEND_PATH.joinpath('qml')
 RCC_PATH = FRONTEND_PATH.joinpath('rcc')
 
@@ -41,10 +41,12 @@ def rcc(ctx):   # noqa:
 
 @task()
 def qml(ctx, path):
+    """Run qml tool"""
     path = Path(path).absolute()
     if not (path.exists() and path.is_dir()):
         print(f"Directory {path} doesn't exist")
-    qml = Path(ctx.Qt.bin_path).joinpath('qml')
+    # aka /usr/bin/qml
+    qml = Path(ctx.Qt.bin_path).joinpath(ctx.Qt.qml_command)
     includes = ' '.join([f'-I {_}' for _ in (QML_PATH,)])
     command = f'{qml} {includes} {path}'
     env = {
@@ -55,6 +57,7 @@ def qml(ctx, path):
         )),
     }
     # with ctx.cd('.'):
+    print(command)
     ctx.run(command, env=env)
 
 ####################################################################################################

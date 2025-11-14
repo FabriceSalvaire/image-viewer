@@ -1,1 +1,5 @@
 Package: ImageBrowser
+Qt:
+    bin_path: /usr/bin
+    qml_command: qml-qt6
+
