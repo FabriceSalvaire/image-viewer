@@ -43,21 +43,57 @@ _module_logger = logging.getLogger(__name__)
 @QmlUncreatable('QmlFileSystemModel')
 class QmlFileSystemModel(QFileSystemModel):
 
-    rootIndexChanged = Signal()
+    root_index_changed = Signal()
 
     ##############################################
 
-    def getDefaultRootDir():
+    def get_default_root_directory():
         return QStandardPaths.writableLocation(QStandardPaths.StandardLocation.HomeLocation)
 
     ##############################################
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.mRootIndex = QModelIndex()
-        self.mDb = QMimeDatabase()
+        self._root_index = QModelIndex()
         self.setFilter(QDir.Filter.AllEntries | QDir.Filter.Hidden | QDir.Filter.NoDotAndDotDot)
-        self.setInitialDirectory()
+        self.set_initial_directory()
+        # self.mDb = QMimeDatabase()
+
+    ##############################################
+
+    def columnCount(self, parent):
+        # Reimplements
+        #   we only need one column in this example
+        return 1
+
+    ##############################################
+
+    def set_initial_directory(self, path=get_default_root_directory()):
+        dir = QDir(path)
+        if dir.makeAbsolute():
+            self.setRootPath(dir.path())
+        else:
+            self.setRootPath(self.get_default_root_directory())
+        self._set_root_index(self.index(dir.path()))
+
+    ##############################################
+
+    # Fixme: root_index deosn't work ???
+
+    @Property(QModelIndex, notify=root_index_changed)
+    def rootIndex(self):
+        return self._root_index
+
+    ##############################################
+
+    # @rootIndex.setter
+    def _set_root_index(self, index):
+        if (index == self._root_index):
+            return
+        self._root_index = index
+        self.root_index_changed.emit()
+
+    ##############################################
 
     # # check for the correct mime type and then read the file.
     # # returns the text file's content or an error message on failure
@@ -84,33 +120,3 @@ class QmlFileSystemModel(QFileSystemModel):
     #     td = textDocument.textDocument()
     #     tb = td.findBlock(cursorPosition)
     #     return tb.blockNumber()
-
-    ##############################################
-
-    def setInitialDirectory(self, path=getDefaultRootDir()):
-        dir = QDir(path)
-        if dir.makeAbsolute():
-            self.setRootPath(dir.path())
-        else:
-            self.setRootPath(self.getDefaultRootDir())
-        self.setRootIndex(self.index(dir.path()))
-
-    ##############################################
-
-    # we only need one column in this example
-    def columnCount(self, parent):
-        return 1
-
-    ##############################################
-
-    @Property(QModelIndex, notify=rootIndexChanged)
-    def rootIndex(self):
-        return self.mRootIndex
-
-    ##############################################
-
-    def setRootIndex(self, index):
-        if (index == self.mRootIndex):
-            return
-        self.mRootIndex = index
-        self.rootIndexChanged.emit()

@@ -10,6 +10,7 @@
 
 // Fixme: lupdate
 pragma Singleton
+
 import QtQml 2.11
 import QtQuick 2.6
 
@@ -32,6 +33,15 @@ QtObject {
 
         // "#5cb85c" hsv 120 128 184
         // "#f0ad4e" hsv 35 172 240
+    }
+
+    property QtObject color_file_system_view: QtObject {
+        readonly property color text: "black"
+        readonly property color selection: "#C8C8C8"
+        readonly property color active: "#B4B4B4"
+        readonly property color folder: "#383737"
+        readonly property color color1: "#A7B464"
+        readonly property color color2: "#D3869B"
     }
 
     property QtObject font_size: QtObject {
