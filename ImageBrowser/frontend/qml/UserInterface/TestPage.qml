@@ -28,6 +28,7 @@ Page {
 
     /******************************************************/
 
+    /*
     Row {
         Test.FolderModelView {
             width: 200
@@ -35,10 +36,16 @@ Page {
         }
 
         Widgets.FileSystemView {
-            width: 200;
+            width: 200
             height: 600
 
             file_system_model: application.file_system_model
         }
+        }
+    */
+
+    Widgets.PathNavigator {
+        width: 600
+        // height: 
     }
 }

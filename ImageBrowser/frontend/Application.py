@@ -270,15 +270,31 @@ class Application(QObject):
         # Define Organisation
         self._application.setOrganizationName(ApplicationMetadata.organisation_name)
         self._application.setOrganizationDomain(ApplicationMetadata.organisation_domain)
+
         # Define Application
         self._application.setApplicationName(ApplicationMetadata.name)
         self._application.setApplicationDisplayName(ApplicationMetadata.display_name)
         self._application.setApplicationVersion(ApplicationMetadata.version)
+
         # Set logo
         # logo_path = ':/icons/logo/logo-256.png'
         # self._application.setWindowIcon(QIcon(logo_path))
+
         # Set icon theme
+        #  cf. ImageBrowser/frontend/rcc/image-browser.qrc
+        #      ImageBrowser/frontend/rcc/icons/material/index.theme
+        _ = QIcon.themeSearchPaths()
+        self._logger.info(f"Theme search path: {_}")
+        _ = QIcon.fallbackThemeName()
+        self._logger.info(f"Fallback icon Theme: {_}")
         QIcon.setThemeName('material')
+        # ['~/.local/share/icons',
+        #  '/var/lib/flatpak/exports/share/icons',
+        #  '/usr/share/icons',
+        #  '/var/lib/snapd/desktop/icons',
+        # ':/icons'
+        # ]
+
         # Settings
         self._settings = ApplicationSettings()
 

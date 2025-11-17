@@ -131,7 +131,8 @@ Rectangle {
                     height: icon_size
                     fillMode: Image.PreserveAspectFit
                     verticalAlignment: Image.AlignVCenter
-                    source: '../../rcc/icons/material/36x36/chevron-right-black.png'
+                    // source: '../../rcc/icons/material/36x36/chevron-right-black.png'
+                    source: 'qrc:/icons/material/36x36/chevron-right-black.png'
                     mirror: part_mouse_area.containsMouse && is_on_chevron2()
 
                     function is_on_chevron2() : bool {
@@ -200,7 +201,8 @@ Rectangle {
                 height: icon_size
                 fillMode: Image.PreserveAspectFit
                 verticalAlignment: Image.AlignVCenter
-                source: '../../rcc/icons/material/36x36/edit-black.png'
+                // source: '../../rcc/icons/material/36x36/edit-black.png'
+                source: 'qrc:/icons/material/36x36/edit-black.png'
                 visible: mouse_area.containsMouse
 
                 /*
@@ -280,28 +282,39 @@ Rectangle {
                         }
                     }
                 }
-                Button {
+
+                // Dolphin W70 H16
+                ToolButton {
                     flat: true
-                    text: 'C'
-                    Layout.preferredWidth: icon_size
+                    // text: 'C'
+                    icon.name: 'backspace-black'
+                    icon.height: icon_size
+                    icon.width: icon_size
+                    // Layout.preferredWidth: icon_size
                     onClicked: {
                         text_input.clear()
                         text_input.forceActiveFocus()
                     }
                 }
-                Button {
+                ToolButton {
                     flat: true
-                    text: 'H'
-                    Layout.preferredWidth: icon_size
+                    // text: 'H'
+                    icon.name: 'keyboard-arrow-down-black'
+                    icon.height: icon_size
+                    icon.width: icon_size
+                    // Layout.preferredWidth: icon_size
                     onClicked: {
                         console.log('H')
                         history_menu.popup()
                     }
                 }
-                Button {
+                ToolButton {
                     flat: true
-                    text: 'V'
-                    Layout.preferredWidth: icon_size
+                    // text: 'V'
+                    icon.name: 'check-black'
+                    icon.height: icon_size
+                    icon.width: icon_size
+                    // Layout.preferredWidth: icon_size
                     onClicked: {
                         console.log('V', text_input.text)
                         edit_mode = false
