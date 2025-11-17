@@ -35,7 +35,8 @@ def clean(ctx):   # noqa:
 @task
 def rcc(ctx):   # noqa:
     with ctx.cd(RCC_PATH):
-        ctx.run('pyside6-rcc application.qrc -o resources.py')
+        # ctx.run('pyside6-rcc application.qrc -o resources.py')
+        ctx.run('pyside6-rcc image-browser.qrc -o ImageBrowserRessource.py')
 
 ####################################################################################################
 
