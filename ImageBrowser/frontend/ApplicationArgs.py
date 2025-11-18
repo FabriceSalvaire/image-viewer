@@ -75,6 +75,7 @@ class ApplicationArgs:
         parser.add_argument(
             '--logging-level',
             default='INFO',
+            # default='DEBUG',
             help="",
         )
 

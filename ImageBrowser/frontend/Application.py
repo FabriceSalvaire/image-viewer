@@ -217,15 +217,17 @@ class Application(QObject):
 
     def _message_handler(self, msg_type: QtMsgType, context: QMessageLogContext, msg: str) -> None:
         # Fixme: can crash at startup
+        # Warning: QML console.log is routed to Debug
+        #   Use console.log = console.debug, console.info, console.warn, or console.error
         method = None
         match msg_type:
-            case QtMsgType.QtDebugMsg:
+            case QtMsgType.QtDebugMsg:   # 0
                 method = self._logger.debug
-            case QtMsgType.QtInfoMsg:
+            case QtMsgType.QtInfoMsg:   # 4
                 method = self._logger.info
-            case QtMsgType.QtWarningMsg:
+            case QtMsgType.QtWarningMsg:   # 1
                 method = self._logger.warning
-            case QtMsgType.QtCriticalMsg | QtMsgType.QtFatalMsg:
+            case QtMsgType.QtCriticalMsg | QtMsgType.QtFatalMsg:   # 2 | 3
                 method = self._logger.critical
             case _:
                 method = self._logger.critical
