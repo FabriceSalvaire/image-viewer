@@ -24,6 +24,8 @@ Rectangle {
     property int icon_size: 24
 
     property bool edit_mode: false
+    property int part_index: -1
+    property string default_completion: ''
 
     ListModel {
         id: path_model
@@ -36,24 +38,26 @@ Rectangle {
     ListModel {
         id: completion_model
 
+        /*
         ListElement {
             path: '/foo/bar/ba'
         }
 
         ListElement {
             path: '/bar/foo/bb'
-        }
+            }
+        */
     }
 
     ListModel {
         id: history_model
 
         ListElement {
-            path: '/foo/bar'
+            path: '/h1/foo/bar'
         }
 
         ListElement {
-            path: '/bar/foo'
+            path: '/h2/bar/foo'
         }
     }
 
@@ -67,9 +71,30 @@ Rectangle {
             directory_model.insert(i, {'name': path_model.get(index).name + '/dir' + i})
     }
 
+    function fill_completion_model(completions: var) {
+        completion_model.clear()
+        // index 0 is default
+        for (var i = 1; i < completions.length; i++)
+            completion_model.insert(i-1, {'name': completions[i]})
+    }
+
+    function set_edit_mode() {
+        default_completion = ''
+        completion.text = ''
+        text_input.text = application.path_navigator.path_str
+        edit_mode = true
+        text_input.forceActiveFocus()
+    }
+
+    function unset_edit_mode() {
+        part_index = -1
+        default_completion = ''
+        edit_mode = false
+    }
+
     Component.onCompleted: {
-        console.info('PathNavigator')
-        fill_path_model()
+        console.info('PathNavigator', application.path_navigator.path_parts)
+        // fill_path_model()
     }
 
     Component {
@@ -85,6 +110,7 @@ Rectangle {
             radius: 4
             // color: part_mouse_area.pressed ? '#dddddd' : 'white'
 
+            /*
             Component.onCompleted: {
                 console.info(
                     'part_rectangle',
@@ -94,6 +120,7 @@ Rectangle {
                     chevron_icon.height
                 )
             }
+            */
 
             MouseArea {
                 id: part_mouse_area
@@ -102,11 +129,16 @@ Rectangle {
                 onClicked: (mouse) => {
                     var _ = is_on_chevron(mouse)
                     console.info('Clicked on directory', _, model.index)
+                    part_index = model.index
                     if (_) {
-                        fill_directory_model(model.index)
+                        // fill_directory_model(model.index)
+                        // application.path_navigator.list_parent(model.index)
+                        application.path_navigator.set_parent_subdirectory(part_index)
                         subdirectory_menu.popup()
-                    } else
-                        console.info('  on part')
+                    } else {
+                        console.info('  on part', model.index)
+                        application.path_navigator.cd_parent(part_index)
+                    }
                 }
 
                 function is_on_chevron(mouse: MouseEvent) : bool {
@@ -145,7 +177,8 @@ Rectangle {
                 Text {
                     id: part_text
                     // anchors.verticalCenter: parent.verticalCenter
-                    text: name
+                    // text: name
+                    text: modelData
                     font.pixelSize: 16
                     // font.family: ''
                 }
@@ -155,7 +188,7 @@ Rectangle {
 
     Rectangle {
         id: root_element
-        width: 500
+        width: 800
         height: icon_size + 2*10
 
         border.color: 'black'
@@ -189,7 +222,8 @@ Rectangle {
                 orientation: ListView.Horizontal
                 spacing: 3 // Style.spacing.base_horizontal
 
-                model: path_model
+                // model: path_model
+                model: application.path_navigator.path_parts
                 delegate: part_delegate
             }
 
@@ -227,7 +261,7 @@ Rectangle {
                     hoverEnabled: true
                     /*
                       onEntered: {
-                      console.log(
+                      console.info(
                       'entered',
                       list_view.contentWidth,
                       mouse_area.mouseX,
@@ -235,8 +269,9 @@ Rectangle {
                       }
                     */
                     onClicked: (mouse) => {
-                        console.log('clicked edit area')
-                        edit_mode = true
+                        // Fixme: don't log
+                        console.info('clicked edit area')
+                        set_edit_mode()
                     }
                 }
             }
@@ -266,17 +301,26 @@ Rectangle {
                         id: text_input
                         anchors.verticalCenter: parent.verticalCenter
                         focus: true
-                        text: '/foo/bar/'
+                        text: ''
+                        // onTextChanged: {
                         onTextEdited: {
-                            console.log('text', text)
-                            completion.text = text + '...'
-                            var pos = Qt.point(text_input.x, text_input.y + text_input.height + 5)
-                            history_menu.popup(pos)
+                            completion_menu.close()
+                            // console.info('complete text', text)
+                            var completions = application.path_navigator.complete(text)
+                            console.info('complete text', text, completions)
+                            if (completions.length) {
+                                default_completion = completions[0]
+                                completion.text = default_completion
+                                fill_completion_model(completions)
+                                var pos = Qt.point(text_input.x, text_input.y + text_input.height + 5)
+                                completion_menu.popup(pos)
+                            }
                             text_input.forceActiveFocus()
                         }
                         Keys.onTabPressed: (event) => {
                             // if (event.key == Qt.Key_Tab) {
-                            text = text + 'completed'
+                            if (default_completion)
+                                text = default_completion
                             event.accepted = true
                             // Fixme: update completion model
                         }
@@ -292,6 +336,9 @@ Rectangle {
                     icon.width: icon_size
                     // Layout.preferredWidth: icon_size
                     onClicked: {
+                        console.info('clear')
+                        default_completion = ''
+                        completion.text = ''
                         text_input.clear()
                         text_input.forceActiveFocus()
                     }
@@ -304,7 +351,7 @@ Rectangle {
                     icon.width: icon_size
                     // Layout.preferredWidth: icon_size
                     onClicked: {
-                        console.log('H')
+                        console.info('history')
                         history_menu.popup()
                     }
                 }
@@ -316,8 +363,9 @@ Rectangle {
                     icon.width: icon_size
                     // Layout.preferredWidth: icon_size
                     onClicked: {
-                        console.log('V', text_input.text)
-                        edit_mode = false
+                        console.info('validate', text_input.text)
+                        application.path_navigator.path_str = text_input.text
+                        unset_edit_mode()
                     }
                 }
             }
@@ -328,12 +376,18 @@ Rectangle {
         id: subdirectory_menu
 
         Instantiator {
-            model: directory_model
+            // model: directory_model
+            model: application.path_navigator.parent_subdirectories
             onObjectAdded: (index, object) => subdirectory_menu.insertItem(index, object)
             onObjectRemoved: (index, object) => subdirectory_menu.removeItem(object)
             delegate: MenuItem {
-                text: name
-                onTriggered: console.info('clicked on directory', name)
+                // text: name
+                text: modelData
+                onTriggered: {
+                    var directory = modelData
+                    console.info('clicked on directory', part_index, directory)
+                    application.path_navigator.cd_parent_subdirectory(part_index, directory)
+                }
             }
         }
     }
@@ -346,9 +400,14 @@ Rectangle {
             onObjectAdded: (index, object) => completion_menu.insertItem(index, object)
             onObjectRemoved: (index, object) => completion_menu.removeItem(object)
             delegate: MenuItem {
-                text: path
-                onTriggered: console.info('clicked on path', path)
-                // Complete: set path navigator to
+                text: name
+                onTriggered: {
+                    console.info('clicked on path', name)
+                    // Complete: set path navigator to
+                    default_completion = ''
+                    completion.text = ''
+                    text_input.text = application.path_navigator.complete_with(text_input.text, name)
+                }
             }
         }
     }

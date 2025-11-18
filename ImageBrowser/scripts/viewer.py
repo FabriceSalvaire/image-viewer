@@ -41,6 +41,7 @@ def main() -> None:
     args = ApplicationArgs()
 
     from ImageBrowser.library.logging import setup_logging
+    logging.info(f"logging level: {args.logging_level}")
     logger = setup_logging(logging_level=args.logging_level)
 
     import os
