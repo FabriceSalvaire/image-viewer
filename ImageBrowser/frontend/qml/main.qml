@@ -136,6 +136,10 @@ ApplicationWindow {
      *
      */
 
+    // Fixme: hack to group action in a qml file...
+    //   instantiate an empty Item
+    // see quick/multieffect/neumorphicpanel
+    //   qrc <file>qml/Settings.qml</file>
     Ui.Actions {
         id: actions
         image_viewer: image_viewer_page.image_viewer
@@ -183,8 +187,8 @@ ApplicationWindow {
         function set_test_page() { currentIndex = 2 }
 
         Component.onCompleted: {
-            // set_thumbnail_page()
-            set_test_page()
+            set_thumbnail_page()
+            // set_test_page()
         }
 
         // Fixme: simplify with Page { Widget{} } ???

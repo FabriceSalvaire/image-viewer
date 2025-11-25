@@ -11,8 +11,8 @@
 // Fixme: lupdate
 pragma Singleton
 
-import QtQml 2.11
-import QtQuick 2.6
+import QtQml
+import QtQuick
 
 QtObject {
 
