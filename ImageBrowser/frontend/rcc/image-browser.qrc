@@ -1,5 +1,12 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
+    <!--
+    <qresource prefix="/">
+        ... file path are prefixed by prefix
+        <file alias="...">.../foo.png</file>
+    </qresource>
+    -->
+
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
     </qresource>
@@ -342,6 +349,33 @@
         <!-- <file>icons/material/24x24@2/sort-black.png</file> -->
         <file>icons/material/36x36@2/sort-black.png</file>
         <!-- <file>icons/material/48x48@2/sort-black.png</file> -->
+
+        <!-- <file>icons/material/20x20/star-white.png</file> -->
+        <!-- <file>icons/material/20x20@2/star-white.png</file> -->
+        <!-- <file>icons/material/24x24/star-white.png</file> -->
+        <!-- <file>icons/material/24x24@2/star-white.png</file> -->
+        <file>icons/material/40x40/star-white.png</file>
+        <file>icons/material/40x40@2/star-white.png</file>
+        <!-- <file>icons/material/48x48/star-white.png</file> -->
+        <!-- <file>icons/material/48x48@2/star-white.png</file> -->
+
+        <!-- <file>icons/material/20x20/star-half-white.png</file> -->
+        <!-- <file>icons/material/20x20@2/star-half-white.png</file> -->
+        <!-- <file>icons/material/24x24/star-half-white.png</file> -->
+        <!-- <file>icons/material/24x24@2/star-half-white.png</file> -->
+        <file>icons/material/40x40/star-half-white.png</file>
+        <file>icons/material/40x40@2/star-half-white.png</file>
+        <!-- <file>icons/material/48x48/star-half-white.png</file> -->
+        <!-- <file>icons/material/48x48@2/star-half-white.png</file> -->
+
+        <!-- <file>icons/material/20x20/star-black.png</file> -->
+        <!-- <file>icons/material/20x20@2/star-black.png</file> -->
+        <!-- <file>icons/material/24x24/star-black.png</file> -->
+        <!-- <file>icons/material/24x24@2/star-black.png</file> -->
+        <file>icons/material/40x40/star-black.png</file>
+        <file>icons/material/40x40@2/star-black.png</file>
+        <!-- <file>icons/material/48x48/star-black.png</file> -->
+        <!-- <file>icons/material/48x48@2/star-black.png</file> -->
 
         <!-- <file>icons/material/18x18/subject-black.png</file> -->
         <!-- <file>icons/material/24x24/subject-black.png</file> -->
