@@ -370,7 +370,7 @@ class Application(QObject):
         # if self._args.watcher:
         #     self._logger.info('Start watcher')
         #     self._collection.start_watcher()   # QtCore.QFileSystemWatcher(self)
-        path = Path(self._args.path)
+        path = Path(self._args.path).absolute()
         if path.exists():
             url = QUrl(f'file:{path}')
             self._qml_application.load_collection(url)
