@@ -6,6 +6,8 @@
  *
  **************************************************************************************************/
 
+// Toolbars visibility are binded to paged
+
 import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.11
@@ -24,6 +26,7 @@ ToolBar {
      */
 
     property var actions
+    // property var tumbnail_viewer_page
     property var image_viewer_page
     property var stack_layout
 
@@ -52,7 +55,32 @@ ToolBar {
                 onClicked: stack_layout.set_viewer_page()
             }
 
+            Widgets.ToolButtonTip {
+                icon.name: 'sort-black'
+                tip: qsTr('Sort collection')
+                onClicked: sort_menu.popup()
+
+                Menu {
+                    id: sort_menu
+
+                    Component.onCompleted: {
+                        console.info('init sort menu', actions.reload_action)
+                        console.info('init sort menu', actions.sort_action_group)
+                        var _ = actions.sort_action_group.actions
+                        _.forEach(action => sort_menu.addAction(action))
+                        sort_menu.addAction(actions.reload_action)
+                    }
+                }
+            }
         }
+
+        /*
+        Ui.ThumbnailViewerToolBar {
+            visible: thumbnail_viewer_page.visible
+
+            actions: root.actions
+            }
+        */
 
         Ui.ImageViewerToolBar {
             visible: image_viewer_page.visible

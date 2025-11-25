@@ -120,6 +120,7 @@ class ImageCollection:
     ##############################################
 
     def __iter__(self) -> Iterator[Image]:
+        # Should be by index
         return iter(self._images)
 
     def iter_by(self, key: Callable) -> Iterator[Image]:
@@ -127,12 +128,20 @@ class ImageCollection:
         images.sort(key=key)
         return iter(images)
 
+    @property
     def iter_by_index(self) -> Iterator[Image]:
-        return self.iter_by(lambda image: int(image))
+        # return self.iter_by(lambda image: int(image))
+        return self.iter_by(lambda image: image.index)
 
+    @property
+    def iter_by_name(self) -> Iterator[Image]:
+        return self.iter_by(lambda image: image.name)
+
+    @property
     def iter_by_mtime(self) -> Iterator[Image]:
         return self.iter_by(lambda image: image.mtime)
 
+    @property
     def iter_by_size(self) -> Iterator[Image]:
         return self.iter_by(lambda image: image.size)
 
@@ -156,6 +165,7 @@ class DirectoryCollection(ImageCollection):
     def __init__(self, path: PathOrStr) -> None:
         super().__init__()
         self._path = Path(str(path)).expanduser().resolve()
+        self._subdirectories = []
         self._get_images()
 
     ##############################################
@@ -170,22 +180,42 @@ class DirectoryCollection(ImageCollection):
     ##############################################
 
     @property
-    def _iter_dir(self) -> Iterator[str]:
-        return self._path.iterdir()
+    def subdirectories(self) -> list[str]:
+        return self._subdirectories
+
+    ##############################################
+
+    def _add_subdirectory(self, name: str) -> None:
+        # Fixme: check duplicate ?
+        self._subdirectories.append(name)
+
+    ##############################################
+
+    # @property
+    # def _iter_dir(self) -> Iterator[str]:
+    #     return self._path.iterdir()
+
+    # Fixme: merge ?
+    #  callback ?
 
     @property
-    def _iter_files(self) -> Iterator[str]:
-        for name in self._iter_dir:
+    def _iter_dir(self) -> Iterator[tuple[str, bool]]:
+        # For efficiency, scan directory in a single pass
+        # for name in self._iter_dir:
+        for name in self._path.iterdir():
             path = self.joinpath(name)
             if path.is_file() and path.suffix in self.EXTENSIONS:
-                yield path
-            # elif path.is_dir():
-            #     pass
+                yield path, False
+            elif path.is_dir():
+                yield path, True
 
     def _get_images(self) -> None:
-        for path in self._iter_files:
-            try:
-                self.add_image(path)
-            except Exception as e:
-                self._logger.warning(f"Error on {path}{LINESEP}{e}")
+        for path, is_dir in self._iter_dir:
+            if is_dir:
+                self._add_subdirectory(path.name)
+            else:
+                try:
+                    self.add_image(path)
+                except Exception as e:
+                    self._logger.warning(f"Error on {path}{LINESEP}{e}")
         self._images.sort()   # by index

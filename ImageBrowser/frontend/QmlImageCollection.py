@@ -133,6 +133,15 @@ class QmlImage(QObject):
 # class QmlImageCollection(QObject):
 class QmlImageCollection(QAbstractListModel):
 
+    # Model for QML
+    #  - QList<QObject*> provides the properties of the objects in the list as roles
+
+    # QAbstractListModel
+    #   Call QAbstractItemModel::dataChanged() when model has changed
+
+    # Sorting
+    #  https://doc.qt.io/Qt-6/qml-qtqml-models-sortfilterproxymodel.html
+
     new_image = Signal(int)
 
     _logger = _module_logger.getChild('QmlImageCollection')
@@ -143,7 +152,9 @@ class QmlImageCollection(QAbstractListModel):
         super().__init__(parent)
         self._collection = DirectoryCollection(path)
         # We must prevent garbage collection
-        self._images = [QmlImage(self, image) for image in self._collection]
+        # iter = self._collection.iter_by_index
+        iter = self._collection.iter_by_name
+        self._images = [QmlImage(self, image) for image in iter]
         # self.reset()
 
     ##############################################
@@ -151,6 +162,14 @@ class QmlImageCollection(QAbstractListModel):
     @Property(str, constant=True)
     def path(self) -> str:
         return str(self._collection.path)
+
+    ##############################################
+
+    subdirectories_changed = Signal()
+
+    @Property('QStringList', notify=subdirectories_changed)
+    def subdirectories(self) -> list[str]:
+        return self._collection.subdirectories
 
     ##############################################
 
@@ -188,9 +207,11 @@ class QmlImageCollection(QAbstractListModel):
     #     return QQmlListProperty(QmlImage, self, self._images)
 
     def rowCount(self, parent=None) -> int:
-        _ = len(self._images)
-        self._logger.info(f"= {_}")
-        return _
+        # required by QAbstractListModel
+        # _ = len(self._images)
+        # self._logger.info(f"= {_}")
+        # return _
+        return len(self._images)
 
     # def at(self, index: int) -> QmlImage:
     #     return self._images[index]
@@ -198,9 +219,10 @@ class QmlImageCollection(QAbstractListModel):
     ImageRole = Qt.UserRole + 1
 
     def roleNames(self):
+        # required by QAbstractListModel for QML
         # required by Repeater
         # https://bugreports.qt.io/browse/PYSIDE-2698
-        self._logger.info(f"ImageRole {self.ImageRole}")
+        self._logger.info(f"QmlImageCollection ImageRole = {self.ImageRole}")
         return {
             self.ImageRole: QByteArray(b'image...'),
         }
@@ -208,9 +230,10 @@ class QmlImageCollection(QAbstractListModel):
         # default[self.RatioRole] = QByteArray(b"ratio")
 
     def data(self, index, role: int = Qt.DisplayRole) -> QmlImage:
+        # required by QAbstractListModel
         # if role == Qt.DisplayRole:
         _ = index.row()
-        self._logger.info(f"index {_} role {role}")
+        # self._logger.info(f"index {_} role {role}")
         return self._images[_]
         # return None
 
@@ -233,6 +256,29 @@ class QmlImageCollection(QAbstractListModel):
     #     notify=images_changed,
     #     final=True,
     # )
+
+    ##############################################
+
+
+    @Slot(str)
+    def sort(self, key: str) -> None:
+        self._logger.info(f"Sort by {key}")
+
+        def _sort(func):
+            self.beginResetModel()
+            self._logger.info(f"sent beginResetModel")
+            self._images.sort(key=func)
+            self._logger.info(f"sorting done")
+            self.endResetModel()
+            self._logger.info(f"sent endResetModel")
+
+        match key:
+            case 'index':
+                _sort(lambda qml_image: qml_image.image.index)
+            case 'name':
+                _sort(lambda qml_image: qml_image.image.name)
+            case 'mtime':
+                _sort(lambda qml_image: qml_image.image.mtime)
 
     ##############################################
 

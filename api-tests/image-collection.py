@@ -18,15 +18,33 @@ from ImageBrowser.backend.thumbnail.FreeDesktop import ThumbnailCache, Thumbnail
 
 thumbnail_cache = ThumbnailCache()
 
-path = Path('~/__priv__').expanduser()
+# path = Path('~/__priv__').expanduser()
+path = Path('./fake-images').absolute()
 
 collection = DirectoryCollection(path)
 
 # for image in collection:
 #     print(image)
 
-for image in collection.iter_by_mtime():
-    print('-'*100)
+print('-'*100)
+print("By index:")
+for image in collection.iter_by_index():
+    print('-'*50)
     print(image)
     th = thumbnail_cache[image.path]
     print(th.normal_path)
+
+print()
+print('-'*100)
+print("By mtime:")
+for image in collection.iter_by_mtime():
+    print('-'*50)
+    print(image)
+    th = thumbnail_cache[image.path]
+    print(th.normal_path)
+
+print()
+print('-'*100)
+print('Subdirectories:')
+for name in collection.subdirectories:
+    print(name)
