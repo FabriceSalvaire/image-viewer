@@ -118,7 +118,8 @@ class QmlApplication(QObject):
     @Slot('QUrl')
     def load_collection(self, url: QUrl) -> None:
         # path = url.toString(QUrl.RemoveScheme)
+        _ = url.toString()
+        self._logger.info(f"Load collection {_}")
         path = url.toLocalFile()
-        self._logger.info(f"{url}  {path}")
         self._application.load_collection(path)
         self.collection_changed.emit()
