@@ -6,10 +6,10 @@
  *
  **************************************************************************************************/
 
-import QtQuick 2.11
-import QtQuick.Controls 2.4
+import QtQuick
+import QtQuick.Controls
 
-import Qt.labs.folderlistmodel 2.7
+// import Qt.labs.folderlistmodel
 
 import ImageBrowser 1.0
 import Widgets 1.0 as Widgets
@@ -44,8 +44,32 @@ Page {
         }
     */
 
+    /*
     Widgets.PathNavigator {
         width: 600
         // height: 
+        }
+    */
+
+    Rectangle {
+        anchors.fill: parent
+
+        Rectangle {
+            x: 200
+            y: 200
+            width: 100
+            height: 100
+            color: "green"
+            antialiasing: true
+
+            WheelHandler {
+                property: "rotation"
+                margin: 10
+                onWheel: (event) => console.info(
+                    "rotation", event.angleDelta.y,
+                    "scaled", rotation, "@", point.position,
+                    "=>", parent.rotation)
+            }
+        }
     }
 }

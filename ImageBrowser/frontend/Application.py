@@ -300,6 +300,16 @@ class Application(QObject):
         # Settings
         self._settings = ApplicationSettings()
 
+        # Set Flickable wheel speed
+        #   qtdeclarative/src/quick/items/qquickflickable.cpp
+        #     void QQuickFlickable::wheelEvent(QWheelEvent *event)
+        #     const qreal wheelScroll = -qApp->styleHints()->wheelScrollLines() * 24;
+        # https://doc.qt.io/qt-6/qapplication.html#wheelScrollLines-prop
+        # default is 3
+        _ = self._application.wheelScrollLines()
+        self._logger.info(f"WheelScrollLines: {_}")
+        # self._application.setWheelScrollLines(16)
+
     ##############################################
 
     def _load_translation(self) -> None:
