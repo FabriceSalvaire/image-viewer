@@ -6,6 +6,8 @@ __pycache__
 du.log
 __TRASH__
 
+nogit/
+
 MANIFEST
 build/
 dist/
@@ -58,3 +60,8 @@ bug.md
 dev-tests/parallel/Pillow/
 dev-tests/parallel/ft-bugs.md
 test.py
+
+fake-images/
+
+notes/pyside-source
+notes/Qt-6.10.0
